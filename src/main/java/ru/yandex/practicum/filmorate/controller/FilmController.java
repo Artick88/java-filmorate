@@ -12,39 +12,30 @@ import java.util.*;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private int id;
-    private Map<Integer, Film> films = new HashMap<>();
+    protected int id;
+    private final Map<Integer, Film> films = new HashMap<>();
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.debug("Create film {}", film);
-        try {
-            int newId = generateId();
-            film.setId(newId);
-            films.put(newId, film);
-            log.debug("Create film successfully");
-            return film;
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-            throw new ValidationException("Не пройдена валидация запроса");
-        }
-
+        int newId = generateId();
+        film.setId(newId);
+        films.put(newId, film);
+        log.debug("Create film successfully");
+        return film;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         log.debug("Update film {}", film);
-        try {
-            if (film.getId() != null && !films.containsKey(film.getId())) {
-                throw new ValidationException("Не найден фильм");
-            }
-            films.put(film.getId(), film);
-            log.debug("Update film successfully");
-            return film;
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-            throw new ValidationException("Не пройдена валидация запроса");
+
+        if (film.getId() != null && !films.containsKey(film.getId())) {
+            throw new ValidationException("Не найден фильм");
         }
+
+        films.put(film.getId(), film);
+        log.debug("Update film successfully");
+        return film;
     }
 
     @GetMapping
@@ -56,5 +47,4 @@ public class FilmController {
     private int generateId() {
         return ++id;
     }
-
 }
