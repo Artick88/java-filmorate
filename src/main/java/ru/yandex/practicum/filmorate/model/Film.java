@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,7 +24,7 @@ public class Film {
     private String description;
 
     @DateTimeFormat(pattern = DATE_FORMAT)
-    @ValidateMinDate(value = MIN_RELEASE_DATE,message = "Некорректная дата релиза")
+    @ValidateMinDate(value = MIN_RELEASE_DATE, message = "Некорректная дата релиза")
     private LocalDate releaseDate;
 
     @Positive(message = "Длина фильма должна быть положительной")

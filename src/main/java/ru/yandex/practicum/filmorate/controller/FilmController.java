@@ -52,6 +52,7 @@ public class FilmController {
         log.debug("getAll films");
         return films.values();
     }
+
     private int generateId() {
         return ++id;
     }
