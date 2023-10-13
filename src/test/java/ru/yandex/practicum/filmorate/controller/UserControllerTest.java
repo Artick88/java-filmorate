@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +30,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void init() {
-        userController.id = 0;
+        userController.newId = 0;
         userController.getAll().clear();
     }
 
@@ -122,7 +122,7 @@ class UserControllerTest {
                 "  \"birthday\": \"1976-09-20\"" +
                 "}";
 
-        assertEquals(ValidationException.class, Objects.requireNonNull(mockMvc.perform(put(URL_BASE)
+        assertEquals(NotFoundException.class, Objects.requireNonNull(mockMvc.perform(put(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isNotFound())

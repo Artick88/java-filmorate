@@ -2,49 +2,40 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Collection;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
-public class FilmController {
-    protected int id;
-    private final Map<Integer, Film> films = new HashMap<>();
+public class FilmController extends BaseController<Film> {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.debug("Create film {}", film);
-        int newId = generateId();
-        film.setId(newId);
-        films.put(newId, film);
-        log.debug("Create film successfully");
-        return film;
+        return super.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         log.debug("Update film {}", film);
-
-        if (film.getId() != null && !films.containsKey(film.getId())) {
-            throw new ValidationException("Не найден фильм");
-        }
-
-        films.put(film.getId(), film);
-        log.debug("Update film successfully");
-        return film;
+        validate(film);
+        return super.update(film);
     }
 
     @GetMapping
     public Collection<Film> getAll() {
         log.debug("getAll films");
-        return films.values();
+        return super.getAll();
     }
 
-    private int generateId() {
-        return ++id;
+    @Override
+    protected void validate(Film film) {
+        if (film.getId() != null && !super.storage.containsKey(film.getId())) {
+            throw new NotFoundException("Не найден фильм");
+        }
     }
 }

@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.util.ValidateMinDate;
@@ -9,13 +12,14 @@ import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
-public class Film {
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+public class Film extends BaseEntity {
 
     private static final int MAX_LENGTH_NAME = 200;
     private static final String MIN_RELEASE_DATE = "1895-12-28";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
-
-    private Integer id;
 
     @NotBlank(message = "Наименование фильма не может быть пустым")
     private String name;

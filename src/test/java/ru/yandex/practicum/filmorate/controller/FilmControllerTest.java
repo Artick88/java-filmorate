@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class FilmControllerTest {
 
     private static final String URL_BASE = "/films";
@@ -30,7 +32,7 @@ class FilmControllerTest {
 
     @BeforeEach
     public void init() {
-        filmController.id = 0;
+        filmController.newId = 0;
         filmController.getAll().clear();
     }
 
@@ -73,8 +75,8 @@ class FilmControllerTest {
     void createFailDescription() throws Exception {
         String body = "{" +
                 "  \"name\": \"Film name\"," +
-                "  \"description\": \"Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «своего отсутствия», стал кандидатом Коломбани.\"," +
-                "    \"releaseDate\": \"1900-03-25\"," +
+                "  \"description\": \" " + "a".repeat(201) + "\"," +
+                "  \"releaseDate\": \"1900-03-25\"," +
                 "  \"duration\": 200" +
                 "}";
 
@@ -156,7 +158,7 @@ class FilmControllerTest {
                 "  \"duration\": 190" +
                 "}";
 
-        assertEquals(ValidationException.class, Objects.requireNonNull(mockMvc.perform(put(URL_BASE)
+        assertEquals(NotFoundException.class, Objects.requireNonNull(mockMvc.perform(put(URL_BASE)
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
