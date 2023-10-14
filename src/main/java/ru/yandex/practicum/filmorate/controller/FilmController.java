@@ -10,7 +10,6 @@ import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {

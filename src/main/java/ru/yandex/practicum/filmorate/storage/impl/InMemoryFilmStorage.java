@@ -41,7 +41,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void validateFindFilmById(Integer id) {
         if (storage.get(id) == null) {
-            throw new NotFoundException(String.format("Не найден фильм %d", id));
+            throw new NotFoundException(String.format("Не найден фильм %d", id), id);
         }
     }
 

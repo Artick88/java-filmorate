@@ -83,7 +83,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void validateFindUserById(Integer id) {
         if (storage.get(id) == null) {
-            throw new NotFoundException(String.format("Не найден пользователь с ид %d", id));
+            throw new NotFoundException(String.format("Не найден пользователь с ид %d", id), id);
         }
     }
 
