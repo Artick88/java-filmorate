@@ -54,9 +54,9 @@ public class UserService {
         return userStorage.getFriends(id);
     }
 
-    public List<User> getMutualFriends(Integer id, Integer otherId) {
+    public List<User> getCommonFriends(Integer id, Integer otherId) {
         log.debug("User {} get mutual friend {}", id, otherId);
-        return userStorage.getMutualFriends(id, otherId);
+        return userStorage.getCommonFriends(id, otherId);
     }
 
     public User getUserById(Integer id) {

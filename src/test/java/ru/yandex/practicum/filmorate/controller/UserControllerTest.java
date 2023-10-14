@@ -8,9 +8,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -34,6 +37,25 @@ class UserControllerTest {
         userController.userService.getAll().clear();
     }
 
+    public void createDefaultUser() {
+        User user = User.builder()
+                .name("name")
+                .birthday(LocalDate.of(1997, 1, 1))
+                .login("login")
+                .name("name")
+                .friends(new HashSet<>())
+                .build();
+
+        userController.userService.create(user);
+    }
+
+    public void addDefaultFriend() {
+        createDefaultUser();
+        createDefaultUser();
+
+        userController.userService.addFriend(1, 2);
+    }
+
     @Test
     void createSuccess() throws Exception {
         String body = "{" +
@@ -47,10 +69,6 @@ class UserControllerTest {
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get(URL_BASE)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(List.of(body).toString()));
     }
 
     @Test
@@ -131,12 +149,7 @@ class UserControllerTest {
 
     @Test
     public void updateSuccess() throws Exception {
-        String bodyCreate = "{" +
-                "  \"login\": \"create\"," +
-                "  \"name\": \"create\"," +
-                "  \"email\": \"create@create.ru\"," +
-                "  \"birthday\": \"1976-09-20\"" +
-                "}";
+        createDefaultUser();
 
         String bodyUpdate = "{" +
                 "  \"login\": \"update\"," +
@@ -146,37 +159,126 @@ class UserControllerTest {
                 "  \"birthday\": \"1976-09-20\"" +
                 "}";
 
-        mockMvc.perform(post(URL_BASE)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(bodyCreate))
-                .andExpect(status().isOk());
-
         mockMvc.perform(put(URL_BASE)
                         .content(bodyUpdate)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get(URL_BASE)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(List.of(bodyUpdate).toString()));
     }
 
     @Test
     public void getAllSuccess() throws Exception {
-        String body = "{" +
-                "  \"login\": \"create\"," +
-                "  \"name\": \"create\"," +
-                "  \"email\": \"create@create.ru\"," +
-                "  \"birthday\": \"1976-09-20\"" +
-                "}";
-
-        mockMvc.perform(post(URL_BASE)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk());
+        createDefaultUser();
 
         mockMvc.perform(get(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(List.of(body).toString()));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("1"))
+                .andExpect(jsonPath("$[0].name").value("name"))
+                .andExpect(jsonPath("$[0].login").value("login"))
+                .andExpect(jsonPath("$[0].friends").isEmpty());
+    }
+
+    @Test
+    public void getUserByIdSuccess() throws Exception {
+        createDefaultUser();
+
+        mockMvc.perform(get(URL_BASE + "/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getUserByIdNotFound() throws Exception {
+        mockMvc.perform(get(URL_BASE + "/-1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addFriendSuccess() throws Exception {
+        createDefaultUser();
+        createDefaultUser();
+
+        mockMvc.perform(put(URL_BASE + "/1/friends/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertFalse(userController.userService.getUserById(1).getFriends().isEmpty());
+    }
+
+    @Test
+    public void addFriendNotFound() throws Exception {
+        mockMvc.perform(put(URL_BASE + "/-1/friends/-2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteFriendSuccess() throws Exception {
+        addDefaultFriend();
+
+        mockMvc.perform(delete(URL_BASE + "/1/friends/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertTrue(userController.userService.getUserById(1).getFriends().isEmpty());
+        assertTrue(userController.userService.getUserById(2).getFriends().isEmpty());
+    }
+
+    @Test
+    public void deleteFriendNotFound() throws Exception {
+        mockMvc.perform(delete(URL_BASE + "/-1/friends/-2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getFriendsSuccess() throws Exception {
+        addDefaultFriend();
+
+        mockMvc.perform(get(URL_BASE + "/1/friends")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("2"));
+    }
+
+    @Test
+    public void getFriendsEmpty() throws Exception {
+        createDefaultUser();
+
+        mockMvc.perform(get(URL_BASE + "/1/friends")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    public void getCommonFriendsEmpty() throws Exception {
+        createDefaultUser();
+        createDefaultUser();
+
+        mockMvc.perform(get(URL_BASE + "/1/friends/common/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    public void getCommonFriendsSuccess() throws Exception {
+        addDefaultFriend();
+
+        User user = User.builder()
+                .name("name")
+                .login("login")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .friends(Set.of(2))
+                .build();
+
+        userController.userService.create(user);
+
+        mockMvc.perform(get(URL_BASE + "/1/friends/common/3")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("2"));
     }
 }

@@ -20,7 +20,7 @@ public interface UserStorage {
 
     List<User> getFriends(Integer id);
 
-    List<User> getMutualFriends(Integer id, Integer otherId);
+    List<User> getCommonFriends(Integer id, Integer otherId);
 
     void validateFindUserById(Integer id);
 

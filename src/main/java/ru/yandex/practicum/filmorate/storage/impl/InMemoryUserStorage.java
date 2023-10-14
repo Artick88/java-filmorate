@@ -66,7 +66,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getMutualFriends(Integer id, Integer otherId) {
+    public List<User> getCommonFriends(Integer id, Integer otherId) {
         validateFindUserById(id);
         validateFindUserById(otherId);
         Set<Integer> friends = storage.get(id).getFriends();
