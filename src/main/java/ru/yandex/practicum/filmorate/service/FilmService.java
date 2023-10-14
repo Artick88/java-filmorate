@@ -65,7 +65,7 @@ public class FilmService {
         return filmStorage.getFilmById(id);
     }
 
-    public void resetId(){
+    public void resetId() {
         log.debug("Reset film storage id");
         filmStorage.resetId();
     }
