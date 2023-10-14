@@ -55,4 +55,8 @@ public class FilmService {
     public Film getFilmById(Integer id) {
         return filmStorage.getFilmById(id);
     }
+
+    public void resetId(){
+        filmStorage.resetId();
+    }
 }

@@ -32,8 +32,8 @@ class FilmControllerTest {
 
     @BeforeEach
     public void init() {
-        //filmController.newId = 0;
-        filmController.getAll().clear();
+        filmController.filmService.getAll().clear();
+        filmController.filmService.resetId();
     }
 
     @Test

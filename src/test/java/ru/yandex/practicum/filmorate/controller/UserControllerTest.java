@@ -30,8 +30,8 @@ class UserControllerTest {
 
     @BeforeEach
     public void init() {
-       // userController.newId = 0;
-        userController.getAll().clear();
+        userController.userService.resetId();
+        userController.userService.getAll().clear();
     }
 
     @Test

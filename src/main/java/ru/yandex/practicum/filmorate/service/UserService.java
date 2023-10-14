@@ -53,4 +53,8 @@ public class UserService {
     public User getUserById(Integer id) {
         return userStorage.getUserById(id);
     }
+
+    public void resetId(){
+        userStorage.resetId();
+    };
 }

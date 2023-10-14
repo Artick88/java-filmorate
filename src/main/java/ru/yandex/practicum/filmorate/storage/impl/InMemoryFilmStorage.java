@@ -55,6 +55,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         storage.get(id).getLikesUser().remove(userId);
     }
 
+    @Override
+    public void resetId() {
+        id = 0;
+    }
+
     private Integer generatedId() {
         return ++id;
     }

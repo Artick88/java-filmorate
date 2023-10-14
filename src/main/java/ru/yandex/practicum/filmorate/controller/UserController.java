@@ -14,7 +14,7 @@ import java.util.*;
 @Slf4j
 public class UserController {
 
-    private final UserService userService;
+    final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {

@@ -23,4 +23,6 @@ public interface UserStorage {
     List<User> getMutualFriends(Integer id, Integer otherId);
 
     void validateFindUserById(Integer id);
+
+    void resetId();
 }
