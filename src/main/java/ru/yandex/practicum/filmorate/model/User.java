@@ -9,6 +9,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -26,4 +28,6 @@ public class User extends BaseEntity {
 
     @PastOrPresent(message = "Дата рождения не может быть будущей")
     private LocalDate birthday;
+
+    private Set<Integer> friends = new HashSet<>();
 }

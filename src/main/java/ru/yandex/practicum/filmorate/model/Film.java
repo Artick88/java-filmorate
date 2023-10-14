@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.util.ValidateMinDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -33,4 +35,6 @@ public class Film extends BaseEntity {
 
     @Positive(message = "Длина фильма должна быть положительной")
     private Long duration;
+
+    private Set<Integer> likesUser = new HashSet<>();
 }

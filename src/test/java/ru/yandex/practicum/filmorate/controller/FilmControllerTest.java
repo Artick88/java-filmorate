@@ -32,7 +32,7 @@ class FilmControllerTest {
 
     @BeforeEach
     public void init() {
-        filmController.newId = 0;
+        //filmController.newId = 0;
         filmController.getAll().clear();
     }
 
