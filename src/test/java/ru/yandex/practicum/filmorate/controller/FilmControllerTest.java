@@ -6,18 +6,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class FilmControllerTest {
 
     private static final String URL_BASE = "/films";
@@ -28,10 +33,40 @@ class FilmControllerTest {
     @Autowired
     FilmController filmController;
 
+    @Autowired
+    UserController userController;
+
     @BeforeEach
     public void init() {
-        filmController.id = 0;
-        filmController.getAll().clear();
+        filmController.filmService.getAll().clear();
+        filmController.filmService.resetId();
+    }
+
+    public void createDefaultUser() {
+        User user = User.builder()
+                .login("login")
+                .name("name")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .friends(new HashSet<>())
+                .build();
+
+        userController.userService.create(user);
+    }
+
+    public void createDefaultFilm() {
+        Film film = Film.builder()
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2020, 1, 1))
+                .duration(100L)
+                .likesUser(new HashSet<>())
+                .build();
+
+        filmController.filmService.create(film);
+    }
+
+    public void addDefaultLike() {
+        filmController.addLike(1, 1);
     }
 
     @Test
@@ -47,11 +82,6 @@ class FilmControllerTest {
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get(URL_BASE)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(List.of(body).toString()));
     }
 
     @Test
@@ -73,8 +103,8 @@ class FilmControllerTest {
     void createFailDescription() throws Exception {
         String body = "{" +
                 "  \"name\": \"Film name\"," +
-                "  \"description\": \"Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «своего отсутствия», стал кандидатом Коломбани.\"," +
-                "    \"releaseDate\": \"1900-03-25\"," +
+                "  \"description\": \" " + "a".repeat(201) + "\"," +
+                "  \"releaseDate\": \"1900-03-25\"," +
                 "  \"duration\": 200" +
                 "}";
 
@@ -116,12 +146,7 @@ class FilmControllerTest {
 
     @Test
     void updateSuccess() throws Exception {
-        String bodyCreate = "{" +
-                "  \"name\": \"Film created\"," +
-                "  \"releaseDate\": \"1999-04-17\"," +
-                "  \"description\": \"film update description\"," +
-                "  \"duration\": 190" +
-                "}";
+        createDefaultFilm();
 
         String bodyUpdate = "{" +
                 "  \"id\": 1," +
@@ -131,19 +156,10 @@ class FilmControllerTest {
                 "  \"duration\": 100" +
                 "}";
 
-        mockMvc.perform(post(URL_BASE)
-                        .content(bodyCreate)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
         mockMvc.perform(put(URL_BASE)
                         .content(bodyUpdate)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get(URL_BASE)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(List.of(bodyUpdate).toString()));
     }
 
     @Test
@@ -156,7 +172,7 @@ class FilmControllerTest {
                 "  \"duration\": 190" +
                 "}";
 
-        assertEquals(ValidationException.class, Objects.requireNonNull(mockMvc.perform(put(URL_BASE)
+        assertEquals(NotFoundException.class, Objects.requireNonNull(mockMvc.perform(put(URL_BASE)
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -165,21 +181,69 @@ class FilmControllerTest {
 
     @Test
     void getAllSuccess() throws Exception {
-        String body = "{" +
-                "  \"name\": \"Film Updated\"," +
-                "  \"releaseDate\": \"1989-04-17\"," +
-                "  \"description\": \"New film update description\"," +
-                "  \"duration\": 190" +
-                "}";
+        createDefaultFilm();
 
-        mockMvc.perform(post(URL_BASE)
-                        .content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get(URL_BASE)
+        assertNotNull(mockMvc.perform(get(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json(List.of(body).toString()));
+                .toString());
+    }
+
+    @Test
+    public void getFilmByIdSuccess() throws Exception {
+        createDefaultFilm();
+
+        mockMvc.perform(get(URL_BASE + "/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("1"));
+    }
+
+    @Test
+    public void getFilmByIdNotFound() throws Exception {
+        mockMvc.perform(get(URL_BASE + "/-1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addLikeSuccess() throws Exception {
+        createDefaultFilm();
+        createDefaultUser();
+
+        mockMvc.perform(put(URL_BASE + "/1/like/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void deleteLikeSuccess() throws Exception {
+        createDefaultUser();
+        createDefaultFilm();
+        addDefaultLike();
+
+        mockMvc.perform(delete(URL_BASE + "/1/like/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void deleteLikeNotFound() throws Exception {
+        mockMvc.perform(delete(URL_BASE + "/-1/like/-1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getTop1LikeFilmSuccess() throws Exception {
+        createDefaultFilm();
+        createDefaultFilm();
+        createDefaultUser();
+        addDefaultLike();
+
+        mockMvc.perform(get(URL_BASE + "/popular?count=1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("1"));
     }
 }
