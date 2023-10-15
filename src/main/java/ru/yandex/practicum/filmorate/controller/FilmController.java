@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -11,14 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
     final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
@@ -36,12 +33,14 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addLike(@PathVariable Integer id,
                         @PathVariable Integer userId) {
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteLike(@PathVariable Integer id,
                            @PathVariable Integer userId) {
         filmService.deleteLike(id, userId);

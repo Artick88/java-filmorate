@@ -201,7 +201,7 @@ class UserControllerTest {
 
         mockMvc.perform(put(URL_BASE + "/1/friends/2")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertFalse(userController.userService.getUserById(1).getFriends().isEmpty());
     }
@@ -219,7 +219,7 @@ class UserControllerTest {
 
         mockMvc.perform(delete(URL_BASE + "/1/friends/2")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertTrue(userController.userService.getUserById(1).getFriends().isEmpty());
         assertTrue(userController.userService.getUserById(2).getFriends().isEmpty());

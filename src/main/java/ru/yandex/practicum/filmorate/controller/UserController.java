@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -10,14 +11,10 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
@@ -35,6 +32,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addFriend(@PathVariable Integer id,
                           @PathVariable Integer friendId) {
         userService.addFriend(id, friendId);
@@ -46,6 +44,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFriend(@PathVariable Integer id,
                              @PathVariable Integer friendId) {
         userService.deleteFriend(id, friendId);
