@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -25,7 +24,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        validateFindUserById(user.getId());
         storage.put(user.getId(), user);
         return user;
     }
@@ -37,29 +35,23 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(Integer id) {
-        validateFindUserById(id);
         return storage.get(id);
     }
 
     @Override
     public void addFriend(Integer id, Integer friendId) {
-        validateFindUserById(id);
-        validateFindUserById(friendId);
         storage.get(id).getFriends().add(friendId);
         storage.get(friendId).getFriends().add(id);
     }
 
     @Override
     public void deleteFriend(Integer id, Integer friendId) {
-        validateFindUserById(id);
-        validateFindUserById(friendId);
         storage.get(id).getFriends().remove(friendId);
         storage.get(friendId).getFriends().remove(id);
     }
 
     @Override
     public List<User> getFriends(Integer id) {
-        validateFindUserById(id);
         return storage.get(id).getFriends().stream()
                 .map(storage::get)
                 .collect(Collectors.toList());
@@ -67,8 +59,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getCommonFriends(Integer id, Integer otherId) {
-        validateFindUserById(id);
-        validateFindUserById(otherId);
         Set<Integer> friends = storage.get(id).getFriends();
         Set<Integer> otherFriends = storage.get(otherId).getFriends();
         if (friends == null || otherFriends == null) {
@@ -81,10 +71,8 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void validateFindUserById(Integer id) {
-        if (storage.get(id) == null) {
-            throw new NotFoundException(String.format("Не найден пользователь с ид %d", id), id);
-        }
+    public boolean existsUserById(Integer id) {
+        return storage.containsKey(id);
     }
 
     @Override

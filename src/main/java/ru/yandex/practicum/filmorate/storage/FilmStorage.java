@@ -15,11 +15,11 @@ public interface FilmStorage {
 
     Film getFilmById(Integer id);
 
-    void validateFindFilmById(Integer id);
-
     void addLike(Integer id, Integer userId);
 
     void deleteLike(Integer id, Integer userId);
 
     void resetId();
+
+    boolean existsFilmById(Integer id);
 }

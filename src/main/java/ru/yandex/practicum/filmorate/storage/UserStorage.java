@@ -22,7 +22,7 @@ public interface UserStorage {
 
     List<User> getCommonFriends(Integer id, Integer otherId);
 
-    void validateFindUserById(Integer id);
+    boolean existsUserById(Integer id);
 
     void resetId();
 }
