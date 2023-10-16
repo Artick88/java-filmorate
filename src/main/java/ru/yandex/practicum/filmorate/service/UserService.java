@@ -7,7 +7,10 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,27 +44,39 @@ public class UserService {
         log.info("Add user {} friend {}", id, friendId);
         validateFindUserById(id);
         validateFindUserById(friendId);
-        userStorage.addFriend(id, friendId);
+        userStorage.getUserById(id).getFriends().add(friendId);
+        userStorage.getUserById(friendId).getFriends().add(id);
     }
 
     public void deleteFriend(Integer id, Integer friendId) {
         log.info("Delete user {} friend {}", id, friendId);
         validateFindUserById(id);
         validateFindUserById(friendId);
-        userStorage.deleteFriend(id, friendId);
+        userStorage.getUserById(id).getFriends().remove(friendId);
+        userStorage.getUserById(friendId).getFriends().remove(id);
     }
 
     public List<User> getFriends(Integer id) {
         log.debug("Get friends, user {}", id);
         validateFindUserById(id);
-        return userStorage.getFriends(id);
+        return userStorage.getUserById(id).getFriends().stream()
+                .map(userStorage::getUserById)
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Integer id, Integer otherId) {
         log.debug("User {} get mutual friend {}", id, otherId);
         validateFindUserById(id);
         validateFindUserById(otherId);
-        return userStorage.getCommonFriends(id, otherId);
+        Set<Integer> friends = userStorage.getUserById(id).getFriends();
+        Set<Integer> otherFriends = userStorage.getUserById(otherId).getFriends();
+        if (friends == null || otherFriends == null) {
+            return new ArrayList<>();
+        }
+        return friends.stream()
+                .filter(otherFriends::contains)
+                .map(userStorage::getUserById)
+                .collect(Collectors.toList());
     }
 
     public User getUserById(Integer id) {
@@ -76,7 +91,7 @@ public class UserService {
     }
 
     public void validateFindUserById(Integer id) {
-        if (!userStorage.existsUserById(id)) {
+        if (userStorage.getUserById(id) == null) {
             throw new NotFoundException(String.format("Не найден пользователь с ид %d", id), id);
         }
     }

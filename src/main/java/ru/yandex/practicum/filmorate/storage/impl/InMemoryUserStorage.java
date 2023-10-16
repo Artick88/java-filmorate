@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -36,43 +35,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(Integer id) {
         return storage.get(id);
-    }
-
-    @Override
-    public void addFriend(Integer id, Integer friendId) {
-        storage.get(id).getFriends().add(friendId);
-        storage.get(friendId).getFriends().add(id);
-    }
-
-    @Override
-    public void deleteFriend(Integer id, Integer friendId) {
-        storage.get(id).getFriends().remove(friendId);
-        storage.get(friendId).getFriends().remove(id);
-    }
-
-    @Override
-    public List<User> getFriends(Integer id) {
-        return storage.get(id).getFriends().stream()
-                .map(storage::get)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<User> getCommonFriends(Integer id, Integer otherId) {
-        Set<Integer> friends = storage.get(id).getFriends();
-        Set<Integer> otherFriends = storage.get(otherId).getFriends();
-        if (friends == null || otherFriends == null) {
-            return new ArrayList<>();
-        }
-        return friends.stream()
-                .filter(otherFriends::contains)
-                .map(storage::get)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean existsUserById(Integer id) {
-        return storage.containsKey(id);
     }
 
     @Override
