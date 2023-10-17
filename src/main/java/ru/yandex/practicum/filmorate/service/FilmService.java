@@ -37,14 +37,14 @@ public class FilmService {
         log.info("Add like film {} user {}", id, userId);
         userService.validateFindUserById(userId);
         validateFindFilmById(id);
-        filmStorage.getFilmById(id).getLikesUser().add(userId);
+        filmStorage.getById(id).getLikesUser().add(userId);
     }
 
     public void deleteLike(Integer id, Integer userId) {
         log.info("Delete like film {} user {}", id, userId);
         userService.validateFindUserById(userId);
         validateFindFilmById(id);
-        filmStorage.getFilmById(id).getLikesUser().remove(userId);
+        filmStorage.getById(id).getLikesUser().remove(userId);
     }
 
     public List<Film> getTopLikeFilms(Integer count) {
@@ -58,7 +58,7 @@ public class FilmService {
     public Film getFilmById(Integer id) {
         log.debug("Get film by id {}", id);
         validateFindFilmById(id);
-        return filmStorage.getFilmById(id);
+        return filmStorage.getById(id);
     }
 
     public void resetId() {
@@ -67,7 +67,7 @@ public class FilmService {
     }
 
     public void validateFindFilmById(Integer id) {
-        if (filmStorage.getFilmById(id) == null) {
+        if (filmStorage.getById(id) == null) {
             throw new NotFoundException(String.format("Не найден фильм %d", id), id);
         }
     }

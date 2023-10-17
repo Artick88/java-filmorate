@@ -44,23 +44,23 @@ public class UserService {
         log.info("Add user {} friend {}", id, friendId);
         validateFindUserById(id);
         validateFindUserById(friendId);
-        userStorage.getUserById(id).getFriends().add(friendId);
-        userStorage.getUserById(friendId).getFriends().add(id);
+        userStorage.getById(id).getFriends().add(friendId);
+        userStorage.getById(friendId).getFriends().add(id);
     }
 
     public void deleteFriend(Integer id, Integer friendId) {
         log.info("Delete user {} friend {}", id, friendId);
         validateFindUserById(id);
         validateFindUserById(friendId);
-        userStorage.getUserById(id).getFriends().remove(friendId);
-        userStorage.getUserById(friendId).getFriends().remove(id);
+        userStorage.getById(id).getFriends().remove(friendId);
+        userStorage.getById(friendId).getFriends().remove(id);
     }
 
     public List<User> getFriends(Integer id) {
         log.debug("Get friends, user {}", id);
         validateFindUserById(id);
-        return userStorage.getUserById(id).getFriends().stream()
-                .map(userStorage::getUserById)
+        return userStorage.getById(id).getFriends().stream()
+                .map(userStorage::getById)
                 .collect(Collectors.toList());
     }
 
@@ -68,21 +68,21 @@ public class UserService {
         log.debug("User {} get mutual friend {}", id, otherId);
         validateFindUserById(id);
         validateFindUserById(otherId);
-        Set<Integer> friends = userStorage.getUserById(id).getFriends();
-        Set<Integer> otherFriends = userStorage.getUserById(otherId).getFriends();
+        Set<Integer> friends = userStorage.getById(id).getFriends();
+        Set<Integer> otherFriends = userStorage.getById(otherId).getFriends();
         if (friends == null || otherFriends == null) {
             return new ArrayList<>();
         }
         return friends.stream()
                 .filter(otherFriends::contains)
-                .map(userStorage::getUserById)
+                .map(userStorage::getById)
                 .collect(Collectors.toList());
     }
 
     public User getUserById(Integer id) {
         log.debug("Get user by id {}", id);
         validateFindUserById(id);
-        return userStorage.getUserById(id);
+        return userStorage.getById(id);
     }
 
     public void resetId() {
@@ -91,7 +91,7 @@ public class UserService {
     }
 
     public void validateFindUserById(Integer id) {
-        if (userStorage.getUserById(id) == null) {
+        if (userStorage.getById(id) == null) {
             throw new NotFoundException(String.format("Не найден пользователь с ид %d", id), id);
         }
     }
