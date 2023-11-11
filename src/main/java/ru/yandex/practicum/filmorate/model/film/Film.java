@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.film;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.yandex.practicum.filmorate.model.BaseEntity;
 import ru.yandex.practicum.filmorate.util.ValidateMinDate;
 
 import javax.validation.constraints.*;
@@ -35,6 +36,10 @@ public class Film extends BaseEntity {
 
     @Positive(message = "Длина фильма должна быть положительной")
     private Long duration;
+
+    private MPA mpa;
+
+    private Set<Genre> genres = new HashSet<>();
 
     private Set<Integer> likesUser = new HashSet<>();
 }

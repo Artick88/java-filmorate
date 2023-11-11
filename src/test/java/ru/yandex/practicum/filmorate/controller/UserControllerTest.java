@@ -8,7 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.storage.impl.InMemory.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -30,10 +31,12 @@ class UserControllerTest {
 
     @Autowired
     UserController userController;
+    @Autowired
+    InMemoryUserStorage inMemoryUserStorage;
 
     @BeforeEach
     public void init() {
-        userController.userService.resetId();
+        inMemoryUserStorage.resetId();
         userController.userService.getAll().clear();
     }
 
@@ -271,7 +274,7 @@ class UserControllerTest {
                 .name("name")
                 .login("login")
                 .birthday(LocalDate.of(2000, 1, 1))
-                .friends(Set.of(2))
+                //.friends(Set.of(2))
                 .build();
 
         userController.userService.create(user);

@@ -1,13 +1,9 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.impl.InMemory;
 
 import ru.yandex.practicum.filmorate.model.BaseEntity;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.AbstractStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryBaseStorage<T extends BaseEntity> implements AbstractStorage<T> {
 
@@ -38,7 +34,6 @@ public class InMemoryBaseStorage<T extends BaseEntity> implements AbstractStorag
         return storage.get(id);
     }
 
-    @Override
     public void resetId() {
         id = 0;
     }
