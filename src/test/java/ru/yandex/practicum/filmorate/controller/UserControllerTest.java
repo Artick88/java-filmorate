@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.model.user.UserFriends;
 import ru.yandex.practicum.filmorate.storage.impl.InMemory.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -28,7 +29,6 @@ class UserControllerTest {
 
     @Autowired
     MockMvc mockMvc;
-
     @Autowired
     UserController userController;
     @Autowired
@@ -274,7 +274,9 @@ class UserControllerTest {
                 .name("name")
                 .login("login")
                 .birthday(LocalDate.of(2000, 1, 1))
-                //.friends(Set.of(2))
+                .friends(Set.of(UserFriends.builder()
+                        .userId(2)
+                        .build()))
                 .build();
 
         userController.userService.create(user);
