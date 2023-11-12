@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.MPA;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.impl.InMemory.InMemoryFilmStorage;
 
@@ -50,6 +51,7 @@ class FilmControllerTest {
         User user = User.builder()
                 .login("login")
                 .name("name")
+                .email("email")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .friends(new HashSet<>())
                 .build();
@@ -63,6 +65,12 @@ class FilmControllerTest {
                 .description("description")
                 .releaseDate(LocalDate.of(2020, 1, 1))
                 .duration(100L)
+                .mpa(MPA.builder()
+                        .id(1)
+                        .name("P")
+                        .description("mpa description")
+                        .build())
+                .genres(new HashSet<>())
                 .likesUser(new HashSet<>())
                 .build();
 
@@ -79,7 +87,8 @@ class FilmControllerTest {
                 "  \"name\": \"nisei usermod\"," +
                 "  \"description\": \"radicalising\"," +
                 "  \"releaseDate\": \"1967-03-25\"," +
-                "  \"duration\": 100" +
+                "  \"duration\": 100," +
+                "  \"mpa\": { \"id\": 1}" +
                 "}";
 
         mockMvc.perform(post(URL_BASE)
@@ -157,7 +166,8 @@ class FilmControllerTest {
                 "  \"name\": \"Film Updated\"," +
                 "  \"releaseDate\": \"1999-12-12\"," +
                 "  \"description\": \"New film update description\"," +
-                "  \"duration\": 100" +
+                "  \"duration\": 100," +
+                "  \"mpa\": { \"id\": 1}" +
                 "}";
 
         mockMvc.perform(put(URL_BASE)
