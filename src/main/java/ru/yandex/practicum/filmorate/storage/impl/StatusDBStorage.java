@@ -42,7 +42,8 @@ public class StatusDBStorage implements StatusStorage {
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToStatus, id);
     }
 
-    public Status findIdByCode(String code) {
+    @Override
+    public Status getByCode(String code) {
         String sqlQuery = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
                 "FROM \"status_type\" WHERE UPPER(\"code\") = ?";
 

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserFriends;
+import ru.yandex.practicum.filmorate.storage.StatusStorage;
+import ru.yandex.practicum.filmorate.storage.UserFriendsStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.transaction.Transactional;
@@ -15,11 +17,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ru.yandex.practicum.filmorate.util.StatusFriends.NOT_APPROVED;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserStorage userStorage;
+    private final UserFriendsStorage userFriendsStorage;
+    private final StatusStorage statusStorage;
 
     @Transactional
     public User create(User user) {
@@ -52,12 +59,9 @@ public class UserService {
         validateFindUserById(id);
         validateFindUserById(friendId);
 
-        User user = userStorage.getById(id);
-        user.getFriends().add(UserFriends.builder()
-                .userId(friendId)
-                .build());
+        Integer statusIdNotApproved = statusStorage.getByCode(NOT_APPROVED.toString()).getId();
 
-        userStorage.update(user);
+        userFriendsStorage.addFriend(id, friendId, statusIdNotApproved);
     }
 
     @Transactional
@@ -65,21 +69,17 @@ public class UserService {
         log.info("Delete user {} friend {}", id, friendId);
         validateFindUserById(id);
         validateFindUserById(friendId);
-
-        User user = userStorage.getById(id);
-
-        user.setFriends(user.getFriends().stream()
-                .filter(friend -> !friend.getUserId().equals(friendId))
-                .collect(Collectors.toSet()));
-
-        userStorage.update(user);
+        //TODO: сделать обновление статуса
+        userFriendsStorage.deleteFriend(id, friendId);
+        userFriendsStorage.deleteFriend(friendId, id);
     }
 
     @Transactional
     public List<User> getFriends(Integer id) {
         log.debug("Get friends, user {}", id);
         validateFindUserById(id);
-        return userStorage.getById(id).getFriends().stream()
+
+        return userFriendsStorage.getFriendsByUserId(id).stream()
                 .map(UserFriends::getUserId)
                 .map(userStorage::getById)
                 .collect(Collectors.toList());
@@ -90,10 +90,11 @@ public class UserService {
         log.debug("User {} get mutual friend {}", id, otherId);
         validateFindUserById(id);
         validateFindUserById(otherId);
-        Set<Integer> friends = userStorage.getById(id).getFriends().stream()
+
+        Set<Integer> friends = userFriendsStorage.getFriendsByUserId(id).stream()
                 .map(UserFriends::getUserId)
                 .collect(Collectors.toSet());
-        Set<Integer> otherFriends = userStorage.getById(otherId).getFriends().stream()
+        Set<Integer> otherFriends = userFriendsStorage.getFriendsByUserId(otherId).stream()
                 .map(UserFriends::getUserId)
                 .collect(Collectors.toSet());
 

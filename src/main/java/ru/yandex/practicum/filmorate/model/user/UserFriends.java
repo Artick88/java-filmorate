@@ -15,6 +15,8 @@ import javax.validation.constraints.NotNull;
 public class UserFriends extends BaseEntity {
     @NotNull
     private Integer userId;
+    private User user;
     @NotNull
+    private Integer statusId;
     private Status status;
 }
