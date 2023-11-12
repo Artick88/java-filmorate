@@ -1,30 +1,30 @@
---Р РµР№С‚РёРЅРіРё
+--Рейтинги
 INSERT INTO MPA("name", "description")
-SELECT 'G', 'РќРµС‚ РІРѕР·СЂР°СЃС‚РЅС‹С… РѕРіСЂР°РЅРёС‡РµРЅРёР№' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'G');
+SELECT 'G', 'Нет возрастных ограничений' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'G');
 INSERT INTO MPA("name", "description")
-SELECT 'PG', 'Р РµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ РїСЂРёСЃСѓС‚СЃС‚РІРёРµ СЂРѕРґРёС‚РµР»РµР№' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'PG');
+SELECT 'PG', 'Рекомендуется присутствие родителей' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'PG');
 INSERT INTO MPA("name", "description")
-SELECT 'PG-13', 'Р”РµС‚СЏРј РґРѕ 13 Р»РµС‚ РїСЂРѕСЃРјРѕС‚СЂ РЅРµ Р¶РµР»Р°С‚РµР»РµРЅ' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'PG-13');
+SELECT 'PG-13', 'Детям до 13 лет просмотр не желателен' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'PG-13');
 INSERT INTO MPA("name", "description")
-SELECT 'R', 'Р›РёС†Р°Рј РґРѕ 17 Р»РµС‚ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РїСЂРёСЃСѓС‚СЃС‚РІРёРµ РІР·СЂРѕСЃР»РѕРіРѕ' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'R');
+SELECT 'R', 'Лицам до 17 лет обязательно присутствие взрослого' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'R');
 INSERT INTO MPA("name", "description")
-SELECT 'NC-17', 'Р›РёС†Р°Рј РґРѕ 18 Р»РµС‚ РїСЂРѕСЃРјРѕС‚СЂ Р·Р°РїСЂРµС‰РµРЅ' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'NC-17');
+SELECT 'NC-17', 'Лицам до 18 лет просмотр запрещен' WHERE NOT EXISTS (SELECT 1 FROM MPA WHERE "name" = 'NC-17');
 
---Р–Р°РЅСЂС‹
+--Жанры
 INSERT INTO "genre" ("code", "name", "description")
-SELECT 'comedy', 'РљРѕРјРµРґРёСЏ', 'РљРѕРјРµРґРёСЏ' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'comedy');
+SELECT 'comedy', 'Комедия', 'Комедия' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'comedy');
 INSERT INTO "genre" ("code", "name", "description")
-SELECT 'drama', 'Р”СЂР°РјР°', 'Р”СЂР°РјР°' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'drama');
+SELECT 'drama', 'Драма', 'Драма' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'drama');
 INSERT INTO "genre" ("code", "name", "description")
-SELECT 'cartoon', 'РњСѓР»СЊС‚С„РёР»СЊРј', 'РњСѓР»СЊС‚С„РёР»СЊРј' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'cartoon');
+SELECT 'cartoon', 'Мультфильм', 'Мультфильм' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'cartoon');
 INSERT INTO "genre" ("code", "name", "description")
-SELECT 'thriller', 'РўСЂРёР»Р»РµСЂ', 'РўСЂРёР»Р»РµСЂ' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'thriller');
+SELECT 'thriller', 'Триллер', 'Триллер' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'thriller');
 INSERT INTO "genre" ("code", "name", "description")
-SELECT 'documentary', 'Р”РѕРєСѓРјРµРЅС‚Р°Р»СЊРЅС‹Р№', 'Р”РѕРєСѓРјРµРЅС‚Р°Р»СЊРЅС‹Р№ С„РёР»СЊРј' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'documentary');
+SELECT 'documentary', 'Документальный', 'Документальный фильм' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'documentary');
 INSERT INTO "genre" ("code", "name", "description")
-SELECT 'action', 'Р‘РѕРµРІРёРє', 'Р‘РѕРµРІРёРє, СЌРєС€РµРЅ' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'action');
+SELECT 'action', 'Боевик', 'Боевик, экшен' WHERE NOT EXISTS (SELECT 1 FROM "genre" WHERE "code" = 'action');
 
---РЎС‚Р°С‚СѓСЃ Р·Р°СЏРІРѕРє РІ РґСЂСѓР·СЊСЏ
+--Статус заявок в друзья
 INSERT INTO "status_type" ("code", "name", "description")
-      select 'Not_Approved', 'РќРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРѕ', 'Р—Р°СЏРІРєРё РЅР° РґСЂСѓР¶Р±Сѓ РЅРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅР° РїРѕР»СѓС‡Р°С‚РµР»РµРј' WHERE NOT EXISTS (SELECT 1 FROM "status_type" WHERE "code" = 'Not_Approved')
-union select 'Approved', 'РџРѕРґС‚РІРµСЂР¶РґРµРЅРѕ', 'Р—Р°СЏРІРєРё РЅР° РґСЂСѓР¶Р±Сѓ РїРѕРґС‚РІРµСЂР¶РґРµРЅР° РїРѕР»СѓС‡Р°С‚РµР»РµРј' WHERE NOT EXISTS (SELECT 1 FROM "status_type" WHERE "code" = 'Approved');
+      select 'Not_Approved', 'Не подтверждено', 'Заявки на дружбу не подтверждена получателем' WHERE NOT EXISTS (SELECT 1 FROM "status_type" WHERE "code" = 'Not_Approved')
+union select 'Approved', 'Подтверждено', 'Заявки на дружбу подтверждена получателем' WHERE NOT EXISTS (SELECT 1 FROM "status_type" WHERE "code" = 'Approved');
