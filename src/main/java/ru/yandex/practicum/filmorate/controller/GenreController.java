@@ -15,7 +15,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class GenreController {
 
-    final GenreService genreService;
+    private final GenreService genreService;
 
     @GetMapping
     public Collection<Genre> getAll() {

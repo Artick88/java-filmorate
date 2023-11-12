@@ -1,7 +1,6 @@
-package ru.yandex.practicum.filmorate.storage.impl.DB;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -18,7 +17,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 

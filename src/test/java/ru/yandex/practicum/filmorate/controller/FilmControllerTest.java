@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.MPA;
 import ru.yandex.practicum.filmorate.model.user.User;
-import ru.yandex.practicum.filmorate.storage.impl.InMemory.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -38,13 +37,9 @@ class FilmControllerTest {
     @Autowired
     UserController userController;
 
-    @Autowired
-    InMemoryFilmStorage inMemoryFilmStorage;
-
     @BeforeEach
     public void init() {
         filmController.filmService.getAll().clear();
-        inMemoryFilmStorage.resetId();
     }
 
     public void createDefaultUser() {

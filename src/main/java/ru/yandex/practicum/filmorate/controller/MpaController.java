@@ -15,7 +15,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class MpaController {
 
-    final MpaService mpaService;
+    private final MpaService mpaService;
 
     @GetMapping
     public Collection<MPA> getAll() {
