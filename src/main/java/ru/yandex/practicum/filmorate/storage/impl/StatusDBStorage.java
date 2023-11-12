@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatusDBStorage implements StatusStorage {
 
-    final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public Status create(Status data) {

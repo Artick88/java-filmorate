@@ -32,13 +32,13 @@ public class FilmDbStorage implements FilmStorage {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setString(1, data.getName());
-            stmt.setString(2, data.getDescription());
-            stmt.setDate(3, Date.valueOf(data.getReleaseDate()));
-            stmt.setLong(4, data.getDuration());
-            stmt.setInt(5, data.getMpa().getId());
-            return stmt;
+            PreparedStatement ps = connection.prepareStatement(sqlQuery, new String[]{"id"});
+            ps.setString(1, data.getName());
+            ps.setString(2, data.getDescription());
+            ps.setDate(3, Date.valueOf(data.getReleaseDate()));
+            ps.setLong(4, data.getDuration());
+            ps.setInt(5, data.getMpa().getId());
+            return ps;
         }, keyHolder);
 
         data.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
@@ -134,9 +134,13 @@ public class FilmDbStorage implements FilmStorage {
     private void addGenresByFilm(Integer filmId, Set<Genre> genres) {
         String sqlQuery = "INSERT INTO \"film_genre\" (\"film_id\", \"genre_id\") VALUES(?, ?)";
 
-        for (Genre genre : genres) {
-            jdbcTemplate.update(sqlQuery, filmId, genre.getId());
-        }
+        jdbcTemplate.batchUpdate(sqlQuery,
+                genres,
+                100,
+                (PreparedStatement ps, Genre genre) -> {
+                    ps.setInt(1, filmId);
+                    ps.setInt(2, genre.getId());
+                });
     }
 
     private void deleteGenresFilmById(Integer filmId) {
@@ -164,16 +168,24 @@ public class FilmDbStorage implements FilmStorage {
     private void addLikesUserFilm(Integer filmId, Set<Integer> likesUser) {
         String sqlQuery = "INSERT INTO \"film_likes\" (\"film_id\", \"user_id\") VALUES(?, ?)";
 
-        for (Integer userId : likesUser) {
-            jdbcTemplate.update(sqlQuery, filmId, userId);
-        }
+        jdbcTemplate.batchUpdate(sqlQuery,
+                likesUser,
+                100,
+                (PreparedStatement ps, Integer userId) -> {
+                    ps.setInt(1, filmId);
+                    ps.setInt(2, userId);
+                });
     }
 
     private void deleteLikesUserFilm(Integer filmId, Set<Integer> likesUser) {
         String sqlQuery = "DELETE FROM \"film_likes\" WHERE \"film_id\"= ? AND \"user_id\"= ?";
 
-        for (Integer userId : likesUser) {
-            jdbcTemplate.update(sqlQuery, filmId, userId);
-        }
+        jdbcTemplate.batchUpdate(sqlQuery,
+                likesUser,
+                100,
+                (PreparedStatement ps, Integer userID) -> {
+                    ps.setInt(1, filmId);
+                    ps.setInt(2, userID);
+                });
     }
 }
