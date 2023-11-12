@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -31,6 +30,5 @@ public class User extends BaseEntity {
     @PastOrPresent(message = "Дата рождения не может быть будущей")
     private LocalDate birthday;
 
-    @JsonIgnore
     private Set<UserFriends> friends = new HashSet<>();
 }

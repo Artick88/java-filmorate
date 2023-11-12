@@ -15,6 +15,11 @@ import java.util.List;
 public class StatusDBStorage implements StatusStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private static final String SQL_GET_ALL = "SELECT \"id\", \"code\", \"name\", \"description\" FROM \"status_type\"";
+    private static final String SQL_GET_BY_ID = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
+            "FROM \"status_type\" WHERE \"id\" = ?";
+    private static final String SQL_GET_BY_CODE = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
+            "FROM \"status_type\" WHERE UPPER(\"code\") = ?";
 
     @Override
     public Status create(Status data) {
@@ -28,26 +33,17 @@ public class StatusDBStorage implements StatusStorage {
 
     @Override
     public List<Status> getAll() {
-        String sqlQuery = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
-                "FROM \"status_type\"";
-
-        return jdbcTemplate.query(sqlQuery, this::mapRowToStatus);
+        return jdbcTemplate.query(SQL_GET_ALL, this::mapRowToStatus);
     }
 
     @Override
     public Status getById(Integer id) {
-        String sqlQuery = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
-                "FROM \"status_type\" WHERE \"id\" = ?";
-
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToStatus, id);
+        return jdbcTemplate.queryForObject(SQL_GET_BY_ID, this::mapRowToStatus, id);
     }
 
     @Override
     public Status getByCode(String code) {
-        String sqlQuery = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
-                "FROM \"status_type\" WHERE UPPER(\"code\") = ?";
-
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToStatus, code.toUpperCase());
+        return jdbcTemplate.queryForObject(SQL_GET_BY_CODE, this::mapRowToStatus, code.toUpperCase());
     }
 
     private Status mapRowToStatus(ResultSet resultSet, int numRow) throws SQLException {

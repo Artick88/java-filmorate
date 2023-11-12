@@ -15,6 +15,8 @@ import java.util.List;
 public class MpaDBStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private static final String SQL_GET_BY_ID = "SELECT \"id\", \"name\", \"description\" FROM MPA WHERE \"id\" = ?";
+    private static final String SQL_GET_ALL = "SELECT \"id\", \"name\", \"description\" FROM MPA";
 
     @Override
     public MPA create(MPA data) {
@@ -28,16 +30,12 @@ public class MpaDBStorage implements MpaStorage {
 
     @Override
     public List<MPA> getAll() {
-        String sqlQuery = "SELECT \"id\", \"name\", \"description\" FROM MPA";
-
-        return jdbcTemplate.query(sqlQuery, this::mapRowToMpa);
+        return jdbcTemplate.query(SQL_GET_ALL, this::mapRowToMpa);
     }
 
     @Override
     public MPA getById(Integer id) {
-        String sqlQuery = "SELECT \"id\", \"name\", \"description\" FROM MPA WHERE \"id\" = ?";
-
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToMpa, id);
+        return jdbcTemplate.queryForObject(SQL_GET_BY_ID, this::mapRowToMpa, id);
     }
 
     private MPA mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {

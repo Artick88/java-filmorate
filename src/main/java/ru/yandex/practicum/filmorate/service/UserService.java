@@ -50,7 +50,9 @@ public class UserService {
     @Transactional
     public List<User> getAll() {
         log.debug("Get all users");
-        return userStorage.getAll();
+        return userStorage.getAll().stream()
+                .peek(user -> user.setFriends(userFriendsStorage.getFriendsByUserId(user.getId())))
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -69,6 +71,7 @@ public class UserService {
         log.info("Delete user {} friend {}", id, friendId);
         validateFindUserById(id);
         validateFindUserById(friendId);
+
         //TODO: сделать обновление статуса
         userFriendsStorage.deleteFriend(id, friendId);
         userFriendsStorage.deleteFriend(friendId, id);
@@ -111,7 +114,9 @@ public class UserService {
     public User getUserById(Integer id) {
         log.debug("Get user by id {}", id);
         validateFindUserById(id);
-        return userStorage.getById(id);
+        User user = userStorage.getById(id);
+        user.setFriends(userFriendsStorage.getFriendsByUserId(user.getId()));
+        return user;
     }
 
     public void validateFindUserById(Integer id) {

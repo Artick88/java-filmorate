@@ -16,26 +16,26 @@ import java.util.stream.Collectors;
 public class UserFriendsDBStorage implements UserFriendsStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private static final String SQL_GET_FRIENDS = "SELECT \"id\", \"user_from_id\", \"user_to_id\", \"status_id\"" +
+            "FROM \"user_friend\" WHERE \"user_from_id\" = ?";
+    private static final String SQL_ADD_FRIEND = "INSERT INTO \"user_friend\" (\"user_from_id\", \"user_to_id\", \"status_id\") VALUES(?, ?, ?)";
+    private static final String SQL_DELETE_FRIEND = "DELETE FROM \"user_friend\" WHERE \"user_from_id\"= ? AND \"user_to_id\" = ?";
+
 
     @Override
     public Set<UserFriends> getFriendsByUserId(Integer userId) {
-        String sqlQuery = "SELECT \"id\", \"user_from_id\", \"user_to_id\", \"status_id\"" +
-                "FROM \"user_friend\" WHERE \"user_from_id\" = ?";
-
-        return jdbcTemplate.queryForStream(sqlQuery, this::mapRowToUserFriends, userId)
+        return jdbcTemplate.queryForStream(SQL_GET_FRIENDS, this::mapRowToUserFriends, userId)
                 .collect(Collectors.toSet());
     }
 
     @Override
     public void addFriend(Integer userId, Integer friendId, Integer statusId) {
-        String sqlQuery = "INSERT INTO \"user_friend\" (\"user_from_id\", \"user_to_id\", \"status_id\") VALUES(?, ?, ?)";
-        jdbcTemplate.update(sqlQuery, userId, friendId, statusId);
+        jdbcTemplate.update(SQL_ADD_FRIEND, userId, friendId, statusId);
     }
 
     @Override
     public void deleteFriend(Integer userId, Integer friendId) {
-        String sqlQuery = "DELETE FROM \"user_friend\" WHERE \"user_from_id\"= ? AND \"user_to_id\" = ?";
-        jdbcTemplate.update(sqlQuery, userId, friendId);
+        jdbcTemplate.update(SQL_DELETE_FRIEND, userId, friendId);
     }
 
     private UserFriends mapRowToUserFriends(ResultSet resultSet, int numRow) throws SQLException {
