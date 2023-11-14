@@ -29,7 +29,7 @@ public class FilmService {
         log.info("Create film {}", film);
         Film createdFilm = filmStorage.create(film);
         updateGenres(film);
-        createdFilm.setMpa(mpaService.getById(createdFilm.getMpaId()));
+        createdFilm.setMpa(mpaService.getById((createdFilm.getMpa().getId())));
         createdFilm.setGenres(genreStorage.getGenresByFilmId(createdFilm.getId()));
         return createdFilm;
     }
@@ -40,7 +40,7 @@ public class FilmService {
         validateFindFilmById(film.getId());
         Film savedFilm = filmStorage.update(film);
         updateGenres(film);
-        savedFilm.setMpa(mpaService.getById(savedFilm.getMpaId()));
+        savedFilm.setMpa(mpaService.getById(savedFilm.getMpa().getId()));
         savedFilm.setGenres(genreStorage.getGenresByFilmId(savedFilm.getId()));
         return savedFilm;
     }
@@ -48,7 +48,7 @@ public class FilmService {
     public List<Film> getAll() {
         log.debug("Get all films");
         return filmStorage.getAll().stream()
-                .peek(film -> film.setMpa(mpaService.getById(film.getMpaId())))
+                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
                 .peek(film -> film.setGenres(genreStorage.getGenresByFilmId(film.getId())))
                 .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
                 .collect(Collectors.toList());
@@ -78,7 +78,7 @@ public class FilmService {
         return filmLikesStorage.getTopFilmIds(count)
                 .stream()
                 .map(filmStorage::getById)
-                .peek(film -> film.setMpa(mpaService.getById(film.getMpaId())))
+                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
                 .peek(film -> film.setGenres(genreStorage.getGenresByFilmId(film.getId())))
                 .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
                 .sorted((v1, v2) -> v2.getLikesUser().size() - v1.getLikesUser().size())
@@ -89,7 +89,7 @@ public class FilmService {
         log.debug("Get film by id {}", id);
         validateFindFilmById(id);
         Film film = filmStorage.getById(id);
-        film.setMpa(mpaService.getById(film.getMpaId()));
+        film.setMpa(mpaService.getById(film.getMpa().getId()));
         film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
         film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId()));
         return film;
