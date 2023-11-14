@@ -14,9 +14,7 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode(callSuper = true)
 public class UserFriends extends BaseEntity {
     @NotNull
-    private Integer userId;
     private User user;
     @NotNull
-    private Integer statusId;
     private Status status;
 }

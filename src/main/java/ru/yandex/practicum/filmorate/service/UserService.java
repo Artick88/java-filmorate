@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.BaseEntity;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserFriends;
 import ru.yandex.practicum.filmorate.storage.StatusStorage;
@@ -83,8 +84,7 @@ public class UserService {
         validateFindUserById(id);
 
         return userFriendsStorage.getFriendsByUserId(id).stream()
-                .map(UserFriends::getUserId)
-                .map(userStorage::getById)
+                .map(user -> userStorage.getById(user.getUser().getId()))
                 .collect(Collectors.toList());
     }
 
@@ -95,10 +95,12 @@ public class UserService {
         validateFindUserById(otherId);
 
         Set<Integer> friends = userFriendsStorage.getFriendsByUserId(id).stream()
-                .map(UserFriends::getUserId)
+                .map(UserFriends::getUser)
+                .map(BaseEntity::getId)
                 .collect(Collectors.toSet());
         Set<Integer> otherFriends = userFriendsStorage.getFriendsByUserId(otherId).stream()
-                .map(UserFriends::getUserId)
+                .map(UserFriends::getUser)
+                .map(BaseEntity::getId)
                 .collect(Collectors.toSet());
 
         if (friends.isEmpty() || otherFriends.isEmpty()) {

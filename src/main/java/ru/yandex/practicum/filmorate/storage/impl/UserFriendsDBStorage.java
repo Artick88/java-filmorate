@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.storage.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.user.Status;
+import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserFriends;
 import ru.yandex.practicum.filmorate.storage.UserFriendsStorage;
 
@@ -41,8 +43,8 @@ public class UserFriendsDBStorage implements UserFriendsStorage {
     private UserFriends mapRowToUserFriends(ResultSet resultSet, int numRow) throws SQLException {
         return UserFriends.builder()
                 .id(resultSet.getInt("id"))
-                .userId(resultSet.getInt("user_to_id"))
-                .statusId(resultSet.getInt("status_id"))
+                .user(User.builder().id(resultSet.getInt("user_to_id")).build())
+                .status(Status.builder().id(resultSet.getInt("status_id")).build())
                 .build();
     }
 }
