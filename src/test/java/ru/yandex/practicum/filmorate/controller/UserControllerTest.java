@@ -6,34 +6,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.user.User;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class UserControllerTest {
 
     private static final String URL_BASE = "/users";
 
     @Autowired
     MockMvc mockMvc;
-
     @Autowired
     UserController userController;
 
     @BeforeEach
     public void init() {
-        userController.userService.resetId();
         userController.userService.getAll().clear();
     }
 
@@ -43,6 +42,7 @@ class UserControllerTest {
                 .birthday(LocalDate.of(1997, 1, 1))
                 .login("login")
                 .name("name")
+                .email("email")
                 .friends(new HashSet<>())
                 .build();
 
@@ -175,7 +175,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$[0].id").value("1"))
                 .andExpect(jsonPath("$[0].name").value("name"))
                 .andExpect(jsonPath("$[0].login").value("login"))
-                .andExpect(jsonPath("$[0].friends").isEmpty());
+                .andExpect(jsonPath("$[0].friends").isArray());
     }
 
     @Test
@@ -268,13 +268,16 @@ class UserControllerTest {
         addDefaultFriend();
 
         User user = User.builder()
-                .name("name")
-                .login("login")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .friends(Set.of(2))
+                .name("name3")
+                .birthday(LocalDate.of(1997, 1, 1))
+                .login("login3")
+                .name("name3")
+                .email("email3")
+                .friends(new HashSet<>())
                 .build();
 
         userController.userService.create(user);
+        userController.userService.addFriend(3, 2);
 
         mockMvc.perform(get(URL_BASE + "/1/friends/common/3")
                         .contentType(MediaType.APPLICATION_JSON))

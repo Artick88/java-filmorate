@@ -1,9 +1,10 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.user;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import ru.yandex.practicum.filmorate.model.BaseEntity;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -29,5 +30,5 @@ public class User extends BaseEntity {
     @PastOrPresent(message = "Дата рождения не может быть будущей")
     private LocalDate birthday;
 
-    private Set<Integer> friends = new HashSet<>();
+    private Set<UserFriends> friends = new HashSet<>();
 }
