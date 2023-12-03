@@ -5,8 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.storage.FilmLikesStorage;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.ResultSet;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,6 +17,7 @@ public class FilmLikesDBStorage implements FilmLikesStorage {
             "WHERE \"film_id\" = ?";
     private static final String SQL_GET_FILMS_USER_LIKES = "SELECT \"id\", \"film_id\", \"user_id\" FROM \"film_likes\" " +
             "WHERE \"user_id\" = ?";
+    private static final String SQL_GET_ALL_FILMS_LIKES = "SELECT \"id\", \"film_id\", \"user_id\" FROM \"film_likes\"";
     private static final String SQL_ADD_LIKE = "INSERT INTO \"film_likes\" (\"film_id\", \"user_id\") VALUES(?, ?)";
     private static final String SQL_DELETE_LIKE = "DELETE FROM \"film_likes\" WHERE \"film_id\"= ? AND \"user_id\"= ?";
     private static final String SQL_GET_ORDER_LIMIT = "SELECT f.\"id\" FROM \"film\" f " +
@@ -50,5 +51,19 @@ public class FilmLikesDBStorage implements FilmLikesStorage {
     public Set<Integer> getFilmUserLikes(Integer userId) {
         return new HashSet<>(jdbcTemplate.query(SQL_GET_FILMS_USER_LIKES,
                 (rs, rowNum) -> rs.getInt("film_id"), userId));
+    }
+
+    @Override
+    public Map<Integer, List<Integer>> getAll() {
+        HashMap<Integer, List<Integer>> result = new HashMap<>();
+        jdbcTemplate.query(SQL_GET_ALL_FILMS_LIKES, (ResultSet rs) -> {
+            Integer userId = rs.getInt("user_id");
+            Integer filmId = rs.getInt("film_id");
+            if (!result.containsKey(userId)) {
+                result.put(userId, new ArrayList<>());
+            }
+            result.get(userId).add(filmId);
+        });
+        return result;
     }
 }
