@@ -40,7 +40,7 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public void deleteLike(@PathVariable Integer id,
                            @PathVariable Integer userId) {
         filmService.deleteLike(id, userId);
@@ -54,5 +54,10 @@ public class FilmController {
     @GetMapping("/{id}")
     public Film getById(@PathVariable Integer id) {
         return filmService.getFilmById(id);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
     }
 }
