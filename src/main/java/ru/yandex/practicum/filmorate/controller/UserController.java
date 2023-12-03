@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -59,5 +60,10 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable Integer id,
                                        @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getFilmRecommendations(@PathVariable("id") Integer userId) {
+        return userService.getFilmRecommendations(userId);
     }
 }

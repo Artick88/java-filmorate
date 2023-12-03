@@ -6,16 +6,13 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.BaseEntity;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserFriends;
-import ru.yandex.practicum.filmorate.storage.StatusStorage;
-import ru.yandex.practicum.filmorate.storage.UserFriendsStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.util.StatusFriends.NOT_APPROVED;
@@ -28,6 +25,10 @@ public class UserService {
     private final UserStorage userStorage;
     private final UserFriendsStorage userFriendsStorage;
     private final StatusStorage statusStorage;
+    private final FilmLikesStorage filmLikesStorage;
+    private final FilmStorage filmStorage;
+    private final MpaService mpaService;
+    private final GenreService genreService;
 
     @Transactional
     public User create(User user) {
@@ -119,6 +120,31 @@ public class UserService {
         User user = userStorage.getById(id);
         user.setFriends(userFriendsStorage.getFriendsByUserId(user.getId()));
         return user;
+    }
+
+    public List<Film> getFilmRecommendations(Integer userId) {
+        validateFindUserById(userId);
+        Set<Integer> filmsLike = filmLikesStorage.getFilmUserLikes(userId);
+        Map<Integer, List<Integer>> allFilmsLike = filmLikesStorage.getAll();
+        allFilmsLike.remove(userId);
+
+        Map<Integer, Integer> countMatchFilmsUser = allFilmsLike.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> (int) entry.getValue().stream().filter(filmsLike::contains).count()));
+
+        if (countMatchFilmsUser.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Integer recommendationUserId = Collections.max(countMatchFilmsUser.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+        return allFilmsLike.get(recommendationUserId).stream()
+                .filter(filmId -> !filmsLike.contains(filmId))
+                .map(filmStorage::getById)
+                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
+                .peek(film -> film.setGenres(genreService.genreStorage.getGenresByFilmId(film.getId())))
+                .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
+                .collect(Collectors.toList());
     }
 
     public void validateFindUserById(Integer id) {
