@@ -233,7 +233,7 @@ class FilmControllerTest {
 
         mockMvc.perform(delete(URL_BASE + "/1/like/1")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test
