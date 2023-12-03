@@ -10,4 +10,6 @@ public interface FilmLikesStorage {
     Set<Integer> getTopFilmIds(Integer limit);
 
     Set<Integer> getUserLikesFilm(Integer filmId);
+
+    Set<Integer> getFilmUserLikes(Integer userId);
 }

@@ -11,7 +11,9 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -93,6 +95,26 @@ public class FilmService {
         film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
         film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId()));
         return film;
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendsId) {
+        userService.validateFindUserById(userId);
+        userService.validateFindUserById(friendsId);
+
+        Set<Integer> filmIds = filmLikesStorage.getFilmUserLikes(userId);
+        Set<Integer> friendFilmIds = filmLikesStorage.getFilmUserLikes(friendsId);
+
+        if (filmIds.isEmpty() || friendFilmIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return filmIds.stream()
+                .filter(friendFilmIds::contains)
+                .map(filmStorage::getById)
+                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
+                .peek(film -> film.setGenres(genreStorage.getGenresByFilmId(film.getId())))
+                .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
+                .collect(Collectors.toList());
     }
 
     private void updateGenres(Film film) {
