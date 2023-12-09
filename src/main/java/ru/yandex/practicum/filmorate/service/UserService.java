@@ -51,6 +51,13 @@ public class UserService {
     }
 
     @Transactional
+    public void delete(Integer id) {
+        log.info("Delete user by id {}", id);
+        validateFindUserById(id);
+        userStorage.delete(id);
+    }
+
+    @Transactional
     public List<User> getAll() {
         log.debug("Get all users");
         return userStorage.getAll().stream()

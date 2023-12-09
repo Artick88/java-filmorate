@@ -86,20 +86,20 @@ CREATE TABLE IF NOT EXISTS "film_director" (
 
 ALTER TABLE "film" ADD IF NOT EXISTS FOREIGN KEY ("MPA_id") REFERENCES "MPA" ("id");
 
-ALTER TABLE "film_genre" ADD IF NOT EXISTS FOREIGN KEY ("film_id") REFERENCES "film" ("id");
+ALTER TABLE "film_genre" ADD IF NOT EXISTS FOREIGN KEY ("film_id") REFERENCES "film" ("id") ON DELETE CASCADE;;
 
 ALTER TABLE "film_genre" ADD IF NOT EXISTS  FOREIGN KEY ("genre_id") REFERENCES "genre" ("id");
 
-ALTER TABLE "film_likes" ADD IF NOT EXISTS FOREIGN KEY ("film_id") REFERENCES "film" ("id");
+ALTER TABLE "film_likes" ADD IF NOT EXISTS FOREIGN KEY ("film_id") REFERENCES "film" ("id") ON DELETE CASCADE;;
 
-ALTER TABLE "film_likes" ADD IF NOT EXISTS FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "film_likes" ADD IF NOT EXISTS FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE;;
 
-ALTER TABLE "user_friend" ADD IF NOT EXISTS FOREIGN KEY ("user_from_id") REFERENCES "user" ("id");
+ALTER TABLE "user_friend" ADD IF NOT EXISTS FOREIGN KEY ("user_from_id") REFERENCES "user" ("id") ON DELETE CASCADE;;
 
-ALTER TABLE "user_friend" ADD IF NOT EXISTS FOREIGN KEY ("user_to_id") REFERENCES "user" ("id");
+ALTER TABLE "user_friend" ADD IF NOT EXISTS FOREIGN KEY ("user_to_id") REFERENCES "user" ("id") ON DELETE CASCADE;;
 
 ALTER TABLE "user_friend" ADD IF NOT EXISTS FOREIGN KEY ("status_id") REFERENCES "status_type" ("id");
 
-ALTER TABLE "film_director" ADD IF NOT EXISTS FOREIGN KEY ("film_id") REFERENCES "film" ("id");
+ALTER TABLE "film_director" ADD IF NOT EXISTS FOREIGN KEY ("film_id") REFERENCES "film" ("id") ON DELETE CASCADE;;
 
 ALTER TABLE "film_director" ADD IF NOT EXISTS FOREIGN KEY ("director_id") REFERENCES "director" ("id") ON DELETE CASCADE;

@@ -50,6 +50,13 @@ public class FilmService {
         return savedFilm;
     }
 
+    @Transactional
+    public void delete(Integer id) {
+        log.info("Delete film by id {}", id);
+        validateFindFilmById(id);
+        filmStorage.delete(id);
+    }
+
     public List<Film> getAll() {
         log.debug("Get all films");
 
@@ -98,7 +105,9 @@ public class FilmService {
 
         return films.stream()
                 .peek(film -> {
-                    film.setGenres(filmGenresMap.get(film.getId()));
+                    film.setGenres(filmGenresMap.get(film.getId()).stream()
+                            .sorted(Comparator.comparingInt(BaseEntity::getId))
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));
                     film.setLikesUser(filmLikesMap.get(film.getId()));
                     film.setDirectors(filmDirectorsMap.get(film.getId()));
                 }).sorted((v1, v2) -> v2.getLikesUser().size() - v1.getLikesUser().size())
