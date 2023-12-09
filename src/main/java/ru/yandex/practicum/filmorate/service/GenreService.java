@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -20,6 +24,22 @@ public class GenreService {
     public Collection<Genre> getAll() {
         log.info("Get all genres");
         return genreStorage.getAll();
+    }
+
+    public void addGenresByFilm(Integer filmId, Set<Genre> genres) {
+        genreStorage.addGenresByFilm(filmId, genres);
+    }
+
+    public void deleteGenresByFilm(Integer filmId) {
+        genreStorage.deleteGenresByFilm(filmId);
+    }
+
+    public Set<Genre> getGenresByFilmId(Integer filmId) {
+        return genreStorage.getGenresByFilmId(filmId);
+    }
+
+    public Map<Integer, Set<Genre>> getGenresByFilms(List<Film> films) {
+        return genreStorage.getGenresByFilms(films);
     }
 
     public Genre getById(Integer id) {

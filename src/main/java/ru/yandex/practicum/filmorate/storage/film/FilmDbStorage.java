@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,7 +7,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.MPA;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -16,7 +15,6 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
@@ -34,13 +32,24 @@ public class FilmDbStorage implements FilmStorage {
             "f.\"MPA_id\", f.\"created_at\", m.\"name\" mpa_name, m.\"description\" mpa_description FROM \"film\" f " +
             "JOIN MPA m ON m.\"id\" = f.\"MPA_id\" " +
             "WHERE f.\"id\" = ?";
-
     private static final String SQL_GET_FILM_BY_DIRECTOR = "SELECT f.\"id\", f.\"name\", f.\"description\", f.\"release_date\"," +
             " f.\"duration\", f.\"MPA_id\", f.\"created_at\", m.\"name\" mpa_name, m.\"description\" mpa_description  FROM \"director\" d " +
             "JOIN \"film_director\" fd ON d.\"id\" = fd.\"director_id\" " +
             "JOIN \"film\" f ON f.\"id\" = fd.\"film_id\" " +
             "JOIN MPA m ON m.\"id\" = f.\"MPA_id\" " +
             "WHERE fd.\"director_id\" = ?";
+    private static final String SQL_GET_ORDER_LIMIT = "SELECT f.\"id\", f.\"name\", f.\"description\", f.\"release_date\"," +
+            " f.\"duration\", f.\"MPA_id\", f.\"created_at\", m.\"name\" mpa_name, m.\"description\" mpa_description FROM \"film\" f " +
+            "JOIN MPA m ON m.\"id\" = f.\"MPA_id\" " +
+            "LEFT JOIN \"film_likes\" fl ON f.\"id\" = fl.\"film_id\" " +
+            "GROUP BY f.\"id\" ORDER BY COUNT(fl.\"user_id\") DESC LIMIT ?";
+
+    private static final String SQL_GET_COMMON = "SELECT f.\"id\", f.\"name\", f.\"description\", f.\"release_date\"," +
+            " f.\"duration\", f.\"MPA_id\", f.\"created_at\", m.\"name\" mpa_name, m.\"description\" mpa_description FROM \"film\" f " +
+            "JOIN MPA m ON m.\"id\" = f.\"MPA_id\" " +
+            "JOIN \"film_likes\" l ON f.\"id\" = l.\"film_id\" " +
+            "JOIN \"film_likes\" lf ON f.\"id\" = lf.\"film_id\" " +
+            "WHERE l.\"user_id\" = ? and lf.\"user_id\" = ?";
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         return Film.builder()
@@ -54,6 +63,9 @@ public class FilmDbStorage implements FilmStorage {
                         .name(resultSet.getString("mpa_name"))
                         .description(resultSet.getString("mpa_description"))
                         .build())
+                .genres(new HashSet<>())
+                .likesUser(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
     }
 
@@ -104,7 +116,19 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Set<Film> getFilmsByDirectorId(Integer directorId) {
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_FILM_BY_DIRECTOR, this::mapRowToFilm, directorId));
+    public List<Film> getFilmsByDirectorId(Integer directorId) {
+        return jdbcTemplate.query(SQL_GET_FILM_BY_DIRECTOR, this::mapRowToFilm, directorId);
+    }
+
+    @Override
+    public List<Film> getTopFilmIds(Integer limit) {
+        return jdbcTemplate.query(SQL_GET_ORDER_LIMIT,
+                this::mapRowToFilm,
+                limit);
+    }
+
+    @Override
+    public List<Film> getCommonFriendFilms(int userId, int friendId) {
+        return jdbcTemplate.query(SQL_GET_COMMON, this::mapRowToFilm, userId, friendId);
     }
 }

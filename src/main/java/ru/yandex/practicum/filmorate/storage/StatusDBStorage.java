@@ -1,10 +1,9 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.user.Status;
-import ru.yandex.practicum.filmorate.storage.StatusStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.director;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -6,15 +6,13 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.film.Director;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -27,8 +25,8 @@ public class DirectorDBStorage implements DirectorStorage {
     private static final String SQL_GET_ALL = "SELECT \"id\", \"name\" FROM \"director\"";
     private static final String SQL_UPDATE_DIRECTOR = "UPDATE \"director\" SET \"name\"= ? WHERE \"id\"= ?";
     private static final String SQL_DELETE_DIRECTOR = "DELETE FROM \"director\" WHERE \"id\" = ?";
-    private static final String SQL_GET_DIRECTOR_BY_FILM = "SELECT d.\"id\", d.\"name\" FROM \"director\" d " +
-            "JOIN \"film_director\" fd ON d.\"id\" = fd.\"director_id\" WHERE fd.\"film_id\" = ?";
+    private static final String SQL_GET_DIRECTOR_BY_FILM = "SELECT fd.\"film_id\", d.\"id\", d.\"name\" FROM \"director\" d " +
+            "JOIN \"film_director\" fd ON d.\"id\" = fd.\"director_id\" WHERE fd.\"film_id\" IN (?)";
     private static final String SQL_DELETE_DIRECTOR_BY_FILM = "DELETE FROM \"film_director\" WHERE \"film_id\" = ?";
     private static final String SQL_ADD_RELATION_DIRECTOR_AND_FILM = "INSERT INTO \"film_director\" (\"film_id\", \"director_id\") VALUES(?, ?)";
 
@@ -81,6 +79,22 @@ public class DirectorDBStorage implements DirectorStorage {
     @Override
     public Set<Director> getDirectorsByFilmId(Integer filmId) {
         return new HashSet<>(jdbcTemplate.query(SQL_GET_DIRECTOR_BY_FILM, this::mapRowTo, filmId));
+    }
+
+    @Override
+    public Map<Integer, Set<Director>> getDirectorsByFilm(List<Film> films) {
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        String sqlQuery = SQL_GET_DIRECTOR_BY_FILM.replace("?", inSql);
+
+        Map<Integer, Set<Director>> result = films.stream().collect(Collectors.toMap(Film::getId, Film::getDirectors));
+
+        jdbcTemplate.query(sqlQuery, (ResultSet rs) -> {
+            int filmId = rs.getInt("film_id");
+            Director director = mapRowTo(rs, filmId);
+            result.get(filmId).add(director);
+        }, result.keySet().toArray());
+
+        return result;
     }
 
     @Override

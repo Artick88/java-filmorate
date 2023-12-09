@@ -1,11 +1,11 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.genre;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.BaseEntity;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,8 +22,8 @@ public class GenreDBStorage implements GenreStorage {
     private static final String SQL_ADD_GENRE_BY_FILM = "INSERT INTO \"film_genre\" (\"film_id\", \"genre_id\") VALUES(?, ?)";
     private static final String SQL_GET_BY_ID = "SELECT \"id\", \"code\", \"name\", \"description\" FROM \"genre\" WHERE \"id\" = ?";
     private static final String SQL_GET_ALL = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" FROM \"genre\"";
-    private static final String SQL_GET_GENRES_BY_FILM = "SELECT g.\"id\", g.\"code\", g.\"name\", g.\"description\" " +
-            "FROM \"film_genre\" fg JOIN \"genre\" g ON g.\"id\" = fg.\"genre_id\" WHERE \"film_id\" = ?";
+    private static final String SQL_GET_GENRES_BY_FILM = "SELECT fg.\"film_id\", g.\"id\", g.\"code\", g.\"name\", g.\"description\" " +
+            "FROM \"film_genre\" fg JOIN \"genre\" g ON g.\"id\" = fg.\"genre_id\" WHERE \"film_id\" in (?)";
 
     @Override
     public Genre create(Genre data) {
@@ -79,5 +79,26 @@ public class GenreDBStorage implements GenreStorage {
         return jdbcTemplate.query(SQL_GET_GENRES_BY_FILM, this::mapRowToGenre, filmId).stream()
                 .sorted(Comparator.comparingInt(BaseEntity::getId))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public Map<Integer, Set<Genre>> getGenresByFilms(List<Film> films) {
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        String sqlQuery = SQL_GET_GENRES_BY_FILM.replace("?", inSql);
+
+        Map<Integer, Set<Genre>> result = films.stream().collect(Collectors.toMap(Film::getId, Film::getGenres));
+
+        jdbcTemplate.query(sqlQuery, (ResultSet rs) -> {
+            int filmId = rs.getInt("film_id");
+            Genre genre = Genre.builder()
+                    .id(rs.getInt("id"))
+                    .code(rs.getString("code"))
+                    .name(rs.getString("name"))
+                    .description(rs.getString("description"))
+                    .build();
+            result.get(filmId).add(genre);
+        }, result.keySet().toArray());
+
+        return result;
     }
 }

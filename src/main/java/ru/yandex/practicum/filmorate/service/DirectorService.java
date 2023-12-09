@@ -6,9 +6,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Director;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +48,21 @@ public class DirectorService {
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Не найдена запись с идентификатором", id);
         }
+    }
+
+    public Set<Director> getDirectorsByFilmId(Integer directorId) {
+        return directorStorage.getDirectorsByFilmId(directorId);
+    }
+
+    public void addDirectorByFilm(Integer filmId, Set<Director> directors) {
+        directorStorage.addDirectorByFilm(filmId, directors);
+    }
+
+    public void deleteDirectorsByFilm(Integer filmId) {
+        directorStorage.deleteDirectorsByFilm(filmId);
+    }
+
+    public Map<Integer, Set<Director>> getDirectorsByFilm(List<Film> films) {
+        return directorStorage.getDirectorsByFilm(films);
     }
 }

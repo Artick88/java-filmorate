@@ -10,6 +10,10 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserFriends;
 import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.like.FilmLikesStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.friend.UserFriendsStorage;
 
 import javax.transaction.Transactional;
 import java.util.*;
