@@ -45,6 +45,10 @@ public class GenreDBStorage implements GenreStorage {
         return jdbcTemplate.queryForObject(SQL_GET_BY_ID, this::mapRowToGenre, id);
     }
 
+    @Override
+    public void delete(Integer id) {
+    }
+
     public Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(resultSet.getInt("id"))

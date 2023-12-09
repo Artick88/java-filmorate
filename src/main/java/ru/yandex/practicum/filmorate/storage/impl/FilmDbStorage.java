@@ -9,9 +9,14 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.MPA;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.sql.*;
 import java.sql.Date;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,10 +27,20 @@ public class FilmDbStorage implements FilmStorage {
             "\"duration\", \"MPA_id\") VALUES(?, ?, ?, ?, ?)";
     private static final String SQL_UPDATE_FILM = "UPDATE \"film\" SET \"name\"= ?, \"description\"= ?, " +
             "\"release_date\"= ?, \"duration\"= ?, \"MPA_id\"= ? WHERE \"id\"= ?";
-    private static final String SQL_GET_ALL = "select \"id\", \"name\", \"description\", \"release_date\", \"duration\"," +
-            " \"MPA_id\", \"created_at\" from \"film\"";
-    private static final String SQL_GET_BY_ID = "SELECT \"id\", \"name\", \"description\", \"release_date\", \"duration\"," +
-            " \"MPA_id\", \"created_at\" FROM \"film\" where \"id\" = ?";
+    private static final String SQL_GET_ALL = "select f.\"id\", f.\"name\", f.\"description\", f.\"release_date\", f.\"duration\"," +
+            " f.\"MPA_id\", f.\"created_at\", m.\"name\" mpa_name, m.\"description\" mpa_description from \"film\" f " +
+            "JOIN MPA m ON m.\"id\" = f.\"MPA_id\"";
+    private static final String SQL_GET_BY_ID = "SELECT f.\"id\", f.\"name\", f.\"description\", f.\"release_date\", f.\"duration\", " +
+            "f.\"MPA_id\", f.\"created_at\", m.\"name\" mpa_name, m.\"description\" mpa_description FROM \"film\" f " +
+            "JOIN MPA m ON m.\"id\" = f.\"MPA_id\" " +
+            "WHERE f.\"id\" = ?";
+
+    private static final String SQL_GET_FILM_BY_DIRECTOR = "SELECT f.\"id\", f.\"name\", f.\"description\", f.\"release_date\"," +
+            " f.\"duration\", f.\"MPA_id\", f.\"created_at\", m.\"name\" mpa_name, m.\"description\" mpa_description  FROM \"director\" d " +
+            "JOIN \"film_director\" fd ON d.\"id\" = fd.\"director_id\" " +
+            "JOIN \"film\" f ON f.\"id\" = fd.\"film_id\" " +
+            "JOIN MPA m ON m.\"id\" = f.\"MPA_id\" " +
+            "WHERE fd.\"director_id\" = ?";
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         return Film.builder()
@@ -36,6 +51,8 @@ public class FilmDbStorage implements FilmStorage {
                 .duration(resultSet.getLong("duration"))
                 .mpa(MPA.builder()
                         .id(resultSet.getInt("MPA_id"))
+                        .name(resultSet.getString("mpa_name"))
+                        .description(resultSet.getString("mpa_description"))
                         .build())
                 .build();
     }
@@ -80,5 +97,14 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getById(Integer id) {
         return jdbcTemplate.queryForObject(SQL_GET_BY_ID, this::mapRowToFilm, id);
+    }
+
+    @Override
+    public void delete(Integer id) {
+    }
+
+    @Override
+    public Set<Film> getFilmsByDirectorId(Integer directorId) {
+        return new HashSet<>(jdbcTemplate.query(SQL_GET_FILM_BY_DIRECTOR, this::mapRowToFilm, directorId));
     }
 }

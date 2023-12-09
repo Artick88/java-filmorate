@@ -15,7 +15,7 @@ import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.yandex.practicum.filmorate.util.StatusFriends.NOT_APPROVED;
+import static ru.yandex.practicum.filmorate.util.enumeration.StatusFriends.NOT_APPROVED;
 
 @Slf4j
 @Service
@@ -27,7 +27,6 @@ public class UserService {
     private final StatusStorage statusStorage;
     private final FilmLikesStorage filmLikesStorage;
     private final FilmStorage filmStorage;
-    private final MpaService mpaService;
     private final GenreService genreService;
 
     @Transactional
@@ -141,7 +140,6 @@ public class UserService {
         return allFilmsLike.get(recommendationUserId).stream()
                 .filter(filmId -> !filmsLike.contains(filmId))
                 .map(filmStorage::getById)
-                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
                 .peek(film -> film.setGenres(genreService.genreStorage.getGenresByFilmId(film.getId())))
                 .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
                 .collect(Collectors.toList());

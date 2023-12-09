@@ -42,6 +42,10 @@ public class StatusDBStorage implements StatusStorage {
     }
 
     @Override
+    public void delete(Integer id) {
+    }
+
+    @Override
     public Status getByCode(String code) {
         return jdbcTemplate.queryForObject(SQL_GET_BY_CODE, this::mapRowToStatus, code.toUpperCase());
     }

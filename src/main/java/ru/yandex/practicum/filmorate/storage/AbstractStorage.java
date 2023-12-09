@@ -13,4 +13,6 @@ public interface AbstractStorage<T extends BaseEntity> {
     List<T> getAll();
 
     T getById(Integer id);
+
+    void delete(Integer id);
 }

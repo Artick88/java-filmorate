@@ -38,6 +38,10 @@ public class MpaDBStorage implements MpaStorage {
         return jdbcTemplate.queryForObject(SQL_GET_BY_ID, this::mapRowToMpa, id);
     }
 
+    @Override
+    public void delete(Integer id) {
+    }
+
     private MPA mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
         return MPA.builder()
                 .id(resultSet.getInt("id"))

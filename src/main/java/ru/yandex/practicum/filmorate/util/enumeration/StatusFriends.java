@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.util;
+package ru.yandex.practicum.filmorate.util.enumeration;
 
 public enum StatusFriends {
     APPROVED,
