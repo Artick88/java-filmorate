@@ -1,10 +1,9 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.mpa;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.film.MPA;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +35,10 @@ public class MpaDBStorage implements MpaStorage {
     @Override
     public MPA getById(Integer id) {
         return jdbcTemplate.queryForObject(SQL_GET_BY_ID, this::mapRowToMpa, id);
+    }
+
+    @Override
+    public void delete(Integer id) {
     }
 
     private MPA mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {

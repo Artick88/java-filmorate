@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.filmorate.exception.NoSuchEnumException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
@@ -26,6 +27,13 @@ public class ErrorHandle {
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.info("Not valid parameter - {}, value - {}", Objects.requireNonNull(e.getFieldError()).getField(),
                 e.getFieldError().getRejectedValue());
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNoSuchEnumException(final NoSuchEnumException e) {
+        log.info("Not found enum {}", e.getObject());
         return new ErrorResponse(e.getMessage());
     }
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.impl;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -6,7 +6,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.user.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -66,6 +65,10 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getById(Integer id) {
         return jdbcTemplate.queryForObject(SQL_GET_USER_BY_ID, this::mapRowToUser, id);
+    }
+
+    @Override
+    public void delete(Integer id) {
     }
 
     private User mapRowToUser(ResultSet resultSet, int numRow) throws SQLException {

@@ -9,13 +9,16 @@ import ru.yandex.practicum.filmorate.model.BaseEntity;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserFriends;
-import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.like.FilmLikesStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.friend.UserFriendsStorage;
 
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.yandex.practicum.filmorate.util.StatusFriends.NOT_APPROVED;
+import static ru.yandex.practicum.filmorate.util.enumeration.StatusFriends.NOT_APPROVED;
 
 @Slf4j
 @Service
@@ -24,10 +27,8 @@ public class UserService {
 
     private final UserStorage userStorage;
     private final UserFriendsStorage userFriendsStorage;
-    private final StatusStorage statusStorage;
     private final FilmLikesStorage filmLikesStorage;
     private final FilmStorage filmStorage;
-    private final MpaService mpaService;
     private final GenreService genreService;
 
     @Transactional
@@ -63,9 +64,7 @@ public class UserService {
         validateFindUserById(id);
         validateFindUserById(friendId);
 
-        Integer statusIdNotApproved = statusStorage.getByCode(NOT_APPROVED.toString()).getId();
-
-        userFriendsStorage.addFriend(id, friendId, statusIdNotApproved);
+        userFriendsStorage.addFriend(id, friendId, NOT_APPROVED);
     }
 
     @Transactional
@@ -141,7 +140,6 @@ public class UserService {
         return allFilmsLike.get(recommendationUserId).stream()
                 .filter(filmId -> !filmsLike.contains(filmId))
                 .map(filmStorage::getById)
-                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
                 .peek(film -> film.setGenres(genreService.genreStorage.getGenresByFilmId(film.getId())))
                 .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
                 .collect(Collectors.toList());

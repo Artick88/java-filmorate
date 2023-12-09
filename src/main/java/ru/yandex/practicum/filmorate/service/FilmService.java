@@ -5,15 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.BaseEntity;
+import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
-import ru.yandex.practicum.filmorate.storage.FilmLikesStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.like.FilmLikesStorage;
+import ru.yandex.practicum.filmorate.util.enumeration.SortType;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,16 +24,17 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
     private final FilmLikesStorage filmLikesStorage;
-    private final GenreStorage genreStorage;
-    private final MpaService mpaService;
+    private final GenreService genreService;
+    private final DirectorService directorService;
 
     @Transactional
     public Film create(Film film) {
         log.info("Create film {}", film);
         Film createdFilm = filmStorage.create(film);
         updateGenres(film);
-        createdFilm.setMpa(mpaService.getById((createdFilm.getMpa().getId())));
-        createdFilm.setGenres(genreStorage.getGenresByFilmId(createdFilm.getId()));
+        updateDirectors(film);
+        createdFilm.setGenres(genreService.getGenresByFilmId(createdFilm.getId()));
+        createdFilm.setDirectors(directorService.getDirectorsByFilmId(createdFilm.getId()));
         return createdFilm;
     }
 
@@ -42,18 +44,29 @@ public class FilmService {
         validateFindFilmById(film.getId());
         Film savedFilm = filmStorage.update(film);
         updateGenres(film);
-        savedFilm.setMpa(mpaService.getById(savedFilm.getMpa().getId()));
-        savedFilm.setGenres(genreStorage.getGenresByFilmId(savedFilm.getId()));
+        updateDirectors(film);
+        savedFilm.setGenres(genreService.getGenresByFilmId(savedFilm.getId()));
+        savedFilm.setDirectors(directorService.getDirectorsByFilmId(savedFilm.getId()));
         return savedFilm;
     }
 
     public List<Film> getAll() {
         log.debug("Get all films");
+
+        List<Film> films = filmStorage.getAll();
+
+        Map<Integer, Set<Genre>> filmGenresMap = genreService.getGenresByFilms(films);
+        Map<Integer, Set<Integer>> filmLikesMap = filmLikesStorage.getUserLikesFilm(films);
+        Map<Integer, Set<Director>> filmDirectorsMap = directorService.getDirectorsByFilm(films);
+
         return filmStorage.getAll().stream()
-                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
-                .peek(film -> film.setGenres(genreStorage.getGenresByFilmId(film.getId())))
-                .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
-                .collect(Collectors.toList());
+                .peek(film -> {
+                    film.setGenres(filmGenresMap.get(film.getId()).stream()
+                            .sorted(Comparator.comparingInt(BaseEntity::getId))
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));
+                    film.setLikesUser(filmLikesMap.get(film.getId()));
+                    film.setDirectors(filmDirectorsMap.get(film.getId()));
+                }).collect(Collectors.toList());
     }
 
     @Transactional
@@ -77,13 +90,18 @@ public class FilmService {
     public List<Film> getTopLikeFilms(Integer count) {
         log.debug("Get top like films, count {}", count);
 
-        return filmLikesStorage.getTopFilmIds(count)
-                .stream()
-                .map(filmStorage::getById)
-                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
-                .peek(film -> film.setGenres(genreStorage.getGenresByFilmId(film.getId())))
-                .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
-                .sorted((v1, v2) -> v2.getLikesUser().size() - v1.getLikesUser().size())
+        List<Film> films = filmStorage.getTopFilmIds(count);
+
+        Map<Integer, Set<Genre>> filmGenresMap = genreService.getGenresByFilms(films);
+        Map<Integer, Set<Integer>> filmLikesMap = filmLikesStorage.getUserLikesFilm(films);
+        Map<Integer, Set<Director>> filmDirectorsMap = directorService.getDirectorsByFilm(films);
+
+        return films.stream()
+                .peek(film -> {
+                    film.setGenres(filmGenresMap.get(film.getId()));
+                    film.setLikesUser(filmLikesMap.get(film.getId()));
+                    film.setDirectors(filmDirectorsMap.get(film.getId()));
+                }).sorted((v1, v2) -> v2.getLikesUser().size() - v1.getLikesUser().size())
                 .collect(Collectors.toList());
     }
 
@@ -91,9 +109,9 @@ public class FilmService {
         log.debug("Get film by id {}", id);
         validateFindFilmById(id);
         Film film = filmStorage.getById(id);
-        film.setMpa(mpaService.getById(film.getMpa().getId()));
-        film.setGenres(genreStorage.getGenresByFilmId(film.getId()));
+        film.setGenres(genreService.getGenresByFilmId(film.getId()));
         film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId()));
+        film.setDirectors(directorService.getDirectorsByFilmId(film.getId()));
         return film;
     }
 
@@ -101,30 +119,66 @@ public class FilmService {
         userService.validateFindUserById(userId);
         userService.validateFindUserById(friendsId);
 
-        Set<Integer> filmIds = filmLikesStorage.getFilmUserLikes(userId);
-        Set<Integer> friendFilmIds = filmLikesStorage.getFilmUserLikes(friendsId);
+        List<Film> films = filmStorage.getCommonFriendFilms(userId, friendsId);
 
-        if (filmIds.isEmpty() || friendFilmIds.isEmpty()) {
+        if (films.isEmpty()) {
             return new ArrayList<>();
         }
 
-        return filmIds.stream()
-                .filter(friendFilmIds::contains)
-                .map(filmStorage::getById)
-                .peek(film -> film.setMpa(mpaService.getById(film.getMpa().getId())))
-                .peek(film -> film.setGenres(genreStorage.getGenresByFilmId(film.getId())))
-                .peek(film -> film.setLikesUser(filmLikesStorage.getUserLikesFilm(film.getId())))
-                .collect(Collectors.toList());
+        Map<Integer, Set<Genre>> filmGenresMap = genreService.getGenresByFilms(films);
+        Map<Integer, Set<Integer>> filmLikesMap = filmLikesStorage.getUserLikesFilm(films);
+        Map<Integer, Set<Director>> filmDirectorsMap = directorService.getDirectorsByFilm(films);
+
+        return films.stream()
+                .peek(film -> {
+                    film.setGenres(filmGenresMap.get(film.getId()));
+                    film.setLikesUser(filmLikesMap.get(film.getId()));
+                    film.setDirectors(filmDirectorsMap.get(film.getId()));
+                }).collect(Collectors.toList());
+    }
+
+    public List<Film> getFilmsDirector(Integer directorId, SortType sortBy) {
+        directorService.validatedDirector(directorId);
+
+        List<Film> films = filmStorage.getFilmsByDirectorId(directorId);
+
+        Map<Integer, Set<Genre>> filmGenresMap = genreService.getGenresByFilms(films);
+        Map<Integer, Set<Integer>> filmLikesMap = filmLikesStorage.getUserLikesFilm(films);
+        Map<Integer, Set<Director>> filmDirectorsMap = directorService.getDirectorsByFilm(films);
+
+        return films.stream()
+                .peek(film -> {
+                            film.setDirectors(filmDirectorsMap.get(film.getId()));
+                            film.setLikesUser(filmLikesMap.get(film.getId()));
+                            film.setGenres(filmGenresMap.get(film.getId()));
+                        }
+                ).sorted((o1, o2) -> {
+                    if (sortBy.equals(SortType.LIKES)) {
+                        if (!o1.getLikesUser().isEmpty() && !o2.getLikesUser().isEmpty()) {
+                            return o1.getLikesUser().size() - o2.getLikesUser().size();
+                        }
+                        return o1.getId() - o2.getId();
+                    } else if (sortBy.equals(SortType.YEAR)) {
+                        return o1.getReleaseDate().getYear() - o2.getReleaseDate().getYear();
+                    } else {
+                        return o1.getId() - o2.getId();
+                    }
+                }).collect(Collectors.toList());
     }
 
     private void updateGenres(Film film) {
         //Так как жанры отдельно не добавляют, значит зачищаем все имеющие и заново добавляем
-        genreStorage.deleteGenresByFilm(film.getId());
-        genreStorage.addGenresByFilm(film.getId(), film.getGenres());
+        genreService.deleteGenresByFilm(film.getId());
+        genreService.addGenresByFilm(film.getId(), film.getGenres());
+    }
+
+    private void updateDirectors(Film film) {
+        //Так как директоры отдельно не добавляют, значит зачищаем все имеющие и заново добавляем
+        directorService.deleteDirectorsByFilm(film.getId());
+        directorService.addDirectorByFilm(film.getId(), film.getDirectors());
     }
 
     public void validateFindFilmById(Integer id) {
-        //TODO: не определился как правильно сделать, мои варианты либо обернуть в Optional, либо перехватывать искл.
         try {
             if (filmStorage.getById(id) == null) {
                 throw new NotFoundException(String.format("Не найден фильм %d", id), id);

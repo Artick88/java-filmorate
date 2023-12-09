@@ -1,4 +1,6 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film.like;
+
+import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.util.List;
 import java.util.Map;
@@ -9,9 +11,9 @@ public interface FilmLikesStorage {
 
     void deleteLike(Integer filmId, Integer userId);
 
-    Set<Integer> getTopFilmIds(Integer limit);
-
     Set<Integer> getUserLikesFilm(Integer filmId);
+
+    Map<Integer, Set<Integer>> getUserLikesFilm(List<Film> films);
 
     Set<Integer> getFilmUserLikes(Integer userId);
 

@@ -7,7 +7,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.model.BaseEntity;
-import ru.yandex.practicum.filmorate.util.ValidateMinDate;
+import ru.yandex.practicum.filmorate.util.annotation.ValidateMinDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -42,4 +42,6 @@ public class Film extends BaseEntity {
     private Set<Genre> genres = new HashSet<>();
 
     private Set<Integer> likesUser = new HashSet<>();
+
+    private Set<Director> directors = new HashSet<>();
 }

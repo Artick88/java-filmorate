@@ -67,6 +67,7 @@ class FilmControllerTest {
                         .build())
                 .genres(new HashSet<>())
                 .likesUser(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         filmController.filmService.create(film);
