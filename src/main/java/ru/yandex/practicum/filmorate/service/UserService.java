@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.model.BaseEntity;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserFriends;
-import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.like.FilmLikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -28,7 +27,6 @@ public class UserService {
 
     private final UserStorage userStorage;
     private final UserFriendsStorage userFriendsStorage;
-    private final StatusStorage statusStorage;
     private final FilmLikesStorage filmLikesStorage;
     private final FilmStorage filmStorage;
     private final GenreService genreService;
@@ -66,9 +64,7 @@ public class UserService {
         validateFindUserById(id);
         validateFindUserById(friendId);
 
-        Integer statusIdNotApproved = statusStorage.getByCode(NOT_APPROVED.toString()).getId();
-
-        userFriendsStorage.addFriend(id, friendId, statusIdNotApproved);
+        userFriendsStorage.addFriend(id, friendId, NOT_APPROVED);
     }
 
     @Transactional

@@ -11,14 +11,13 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
+@Deprecated
 public class StatusDBStorage implements StatusStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private static final String SQL_GET_ALL = "SELECT \"id\", \"code\", \"name\", \"description\" FROM \"status_type\"";
     private static final String SQL_GET_BY_ID = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
             "FROM \"status_type\" WHERE \"id\" = ?";
-    private static final String SQL_GET_BY_CODE = "SELECT \"id\", \"code\", \"name\", \"description\", \"created_at\" " +
-            "FROM \"status_type\" WHERE UPPER(\"code\") = ?";
 
     @Override
     public Status create(Status data) {
@@ -42,11 +41,6 @@ public class StatusDBStorage implements StatusStorage {
 
     @Override
     public void delete(Integer id) {
-    }
-
-    @Override
-    public Status getByCode(String code) {
-        return jdbcTemplate.queryForObject(SQL_GET_BY_CODE, this::mapRowToStatus, code.toUpperCase());
     }
 
     private Status mapRowToStatus(ResultSet resultSet, int numRow) throws SQLException {
