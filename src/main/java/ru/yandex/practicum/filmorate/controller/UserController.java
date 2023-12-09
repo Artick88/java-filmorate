@@ -27,6 +27,12 @@ public class UserController {
         return userService.update(user);
     }
 
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Integer id) {
+        userService.delete(id);
+    }
+
     @GetMapping
     public List<User> getAll() {
         return userService.getAll();

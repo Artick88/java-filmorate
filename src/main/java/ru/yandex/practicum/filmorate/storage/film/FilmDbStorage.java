@@ -23,6 +23,8 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private static final String SQL_CREATE_FILM = "INSERT INTO \"film\"(\"name\", \"description\", \"release_date\", " +
             "\"duration\", \"MPA_id\") VALUES(?, ?, ?, ?, ?)";
+
+    private static final String SQL_DELETE_FILM = "DELETE FROM \"film\" WHERE \"id\"= ?";
     private static final String SQL_UPDATE_FILM = "UPDATE \"film\" SET \"name\"= ?, \"description\"= ?, " +
             "\"release_date\"= ?, \"duration\"= ?, \"MPA_id\"= ? WHERE \"id\"= ?";
     private static final String SQL_GET_ALL = "select f.\"id\", f.\"name\", f.\"description\", f.\"release_date\", f.\"duration\"," +
@@ -113,6 +115,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void delete(Integer id) {
+        jdbcTemplate.update(SQL_DELETE_FILM, id);
     }
 
     @Override

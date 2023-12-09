@@ -26,6 +26,7 @@ public class UserDbStorage implements UserStorage {
             "\"birthday\"= ? WHERE \"id\"= ?";
     private static final String SQL_GET_USER_BY_ID = "SELECT \"id\", \"email\", \"login\", \"name\", \"birthday\"" +
             "FROM \"user\" WHERE \"id\" = ?";
+    private static final String SQL_DELETE_USER = "DELETE FROM \"user\" WHERE \"id\"= ?";
 
     @Override
     public User create(User data) {
@@ -69,6 +70,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void delete(Integer id) {
+        jdbcTemplate.update(SQL_DELETE_USER, id);
     }
 
     private User mapRowToUser(ResultSet resultSet, int numRow) throws SQLException {
